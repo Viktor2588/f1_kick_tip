@@ -20,6 +20,54 @@ import {
   submitRacePrediction, submitSprintPrediction, submitSeasonPrediction,
 } from './api.js';
 
+// ---- Header Info (all pages) ----
+
+export function renderHeaderInfo(data) {
+  const container = document.getElementById('header-info');
+  if (!container) return;
+
+  const { season, results } = data;
+  const total = season.races.length;
+  const completed = completedRaceCount(results);
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const next = getNextRace(season, results);
+
+  let nextHtml = '';
+  if (next) {
+    function update() {
+      const cd = countdown(next.raceStartUTC);
+      const timerStr = cd.expired ? 'Läuft!'
+        : `${cd.days}T ${pad(cd.hours)}:${pad(cd.minutes)}:${pad(cd.seconds)}`;
+      container.querySelector('.header-info-timer').textContent = timerStr;
+    }
+
+    nextHtml = `
+      <span class="header-info-next">
+        ${countryFlag(next.countryCode)} ${next.name}
+        ${next.sprint ? '<span class="sprint-badge">Sprint</span>' : ''}
+        <span class="header-info-timer">...</span>
+      </span>
+    `;
+
+    container.innerHTML = `<div class="header-info">
+      <span class="header-info-progress">${completed}/${total} Rennen
+        <span class="progress-bar"><span class="progress-fill" style="width:${pct}%"></span></span>
+      </span>
+      ${nextHtml}
+    </div>`;
+
+    update();
+    setInterval(update, 1000);
+  } else {
+    container.innerHTML = `<div class="header-info">
+      <span class="header-info-progress">${completed}/${total} Rennen
+        <span class="progress-bar"><span class="progress-fill" style="width:${pct}%"></span></span>
+      </span>
+      <span class="header-info-next">Saison abgeschlossen!</span>
+    </div>`;
+  }
+}
+
 // ---- Dashboard (index.html) ----
 
 export function renderDashboard(data) {
@@ -29,8 +77,6 @@ export function renderDashboard(data) {
   );
 
   renderLeaderboard(season, standings);
-  renderSeasonProgress(season, results);
-  renderCountdown(season, results);
   renderTipStatus(season, predictions, sprintPredictions, seasonPredictions, results);
   renderRecentResults(season, predictions, results, standings, data);
   renderCalendar(season, results);
@@ -67,74 +113,6 @@ function renderLeaderboard(season, standings) {
       </div>
     `;
   }).join('');
-}
-
-function renderSeasonProgress(season, results) {
-  const container = document.getElementById('season-progress');
-  if (!container) return;
-
-  const total = season.races.length;
-  const completed = completedRaceCount(results);
-  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-  container.innerHTML = `
-    <div class="flex-between mb-md">
-      <span class="text-secondary">Saison-Fortschritt</span>
-      <span class="fw-bold">${completed} / ${total} Rennen</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width: ${pct}%"></div>
-    </div>
-  `;
-}
-
-function renderCountdown(season, results) {
-  const container = document.getElementById('countdown');
-  if (!container) return;
-
-  const next = getNextRace(season, results);
-  if (!next) {
-    container.innerHTML = `
-      <div class="countdown">
-        <div class="countdown-label">Saison 2026 abgeschlossen!</div>
-      </div>
-    `;
-    return;
-  }
-
-  function update() {
-    const cd = countdown(next.raceStartUTC);
-    container.innerHTML = `
-      <div class="countdown">
-        <div class="countdown-label">
-          Nächstes Rennen: ${countryFlag(next.countryCode)} <strong>${next.name}</strong>
-          ${next.sprint ? '<span class="sprint-badge">Sprint</span>' : ''}
-        </div>
-        <div class="countdown-timer">
-          <div class="countdown-unit">
-            <span class="countdown-value">${pad(cd.days)}</span>
-            <span class="countdown-unit-label">Tage</span>
-          </div>
-          <div class="countdown-unit">
-            <span class="countdown-value">${pad(cd.hours)}</span>
-            <span class="countdown-unit-label">Std</span>
-          </div>
-          <div class="countdown-unit">
-            <span class="countdown-value">${pad(cd.minutes)}</span>
-            <span class="countdown-unit-label">Min</span>
-          </div>
-          <div class="countdown-unit">
-            <span class="countdown-value">${pad(cd.seconds)}</span>
-            <span class="countdown-unit-label">Sek</span>
-          </div>
-        </div>
-        ${cd.expired ? '<div class="mt-md text-secondary">Tipp-Deadline abgelaufen!</div>' : ''}
-      </div>
-    `;
-  }
-
-  update();
-  setInterval(update, 1000);
 }
 
 function renderTipStatus(season, predictions, sprintPredictions, seasonPredictions, results) {

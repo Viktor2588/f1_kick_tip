@@ -4,7 +4,7 @@
 
 import { loadAllData, getQueryParam } from './utils.js';
 import { isLoggedIn, getCurrentPlayer, setCurrentPlayer, clearCurrentPlayer, getPlayerIdFromSession } from './api.js';
-import { renderDashboard, renderRaceDetail, renderSeasonPage, renderRulesPage } from './renderer.js';
+import { renderHeaderInfo, renderDashboard, renderRaceDetail, renderSeasonPage, renderRulesPage } from './renderer.js';
 
 // Known players (must match season.json)
 const KNOWN_PLAYERS = [
@@ -134,6 +134,9 @@ async function init() {
 
   try {
     const data = await loadAllData(basePath);
+
+    // Render header info (season progress + countdown) on all pages
+    renderHeaderInfo(data);
 
     switch (page) {
       case 'dashboard':
