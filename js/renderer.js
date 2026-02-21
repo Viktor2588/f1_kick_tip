@@ -321,9 +321,6 @@ function renderRaceHeader(season, race, results) {
         ${race.circuit} \u2022 ${race.city} \u2022 ${formatDate(race.date)}
         ${race.sprint ? ' <span class="sprint-badge">Sprint</span>' : ''}
       </div>
-      <div class="race-status">
-        <span class="status-badge ${statusClass}">${statusLabel}</span>
-      </div>
     </div>
   `;
 }
@@ -333,36 +330,72 @@ function renderRaceCountdown(race, results) {
   if (!container) return;
 
   const status = getDeadlineStatus(race, results);
-  if (status !== 'open') {
-    container.innerHTML = '';
+  const statusLabel = { open: 'Offen', locked: 'Gesperrt', finished: 'Abgeschlossen' }[status];
+  const statusClass = { open: 'status-open', locked: 'status-locked', finished: 'status-finished' }[status];
+
+  if (status === 'finished') {
+    container.innerHTML = `
+      <div class="race-countdown-card">
+        <div class="countdown">
+          <div class="countdown-label">
+            <span class="status-badge ${statusClass}">${statusLabel}</span>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (status === 'locked') {
+    container.innerHTML = `
+      <div class="race-countdown-card">
+        <div class="countdown">
+          <div class="countdown-label">
+            Tipp-Deadline abgelaufen
+            <span class="status-badge ${statusClass}">${statusLabel}</span>
+          </div>
+        </div>
+      </div>
+    `;
     return;
   }
 
   function update() {
     const cd = countdown(race.raceStartUTC);
     if (cd.expired) {
-      container.innerHTML = '<div class="text-center text-secondary">Tipp-Deadline abgelaufen</div>';
+      container.innerHTML = `
+        <div class="race-countdown-card">
+          <div class="countdown">
+            <div class="countdown-label">Tipp-Deadline abgelaufen</div>
+          </div>
+        </div>
+      `;
       return;
     }
     container.innerHTML = `
-      <div class="countdown">
-        <div class="countdown-label">Deadline: Rennstart</div>
-        <div class="countdown-timer">
-          <div class="countdown-unit">
-            <span class="countdown-value">${pad(cd.days)}</span>
-            <span class="countdown-unit-label">Tage</span>
+      <div class="race-countdown-card">
+        <div class="countdown">
+          <div class="countdown-label">
+            Deadline: Rennstart
+            <span class="status-badge ${statusClass}">${statusLabel}</span>
           </div>
-          <div class="countdown-unit">
-            <span class="countdown-value">${pad(cd.hours)}</span>
-            <span class="countdown-unit-label">Std</span>
-          </div>
-          <div class="countdown-unit">
-            <span class="countdown-value">${pad(cd.minutes)}</span>
-            <span class="countdown-unit-label">Min</span>
-          </div>
-          <div class="countdown-unit">
-            <span class="countdown-value">${pad(cd.seconds)}</span>
-            <span class="countdown-unit-label">Sek</span>
+          <div class="countdown-timer">
+            <div class="countdown-unit">
+              <span class="countdown-value">${pad(cd.days)}</span>
+              <span class="countdown-unit-label">Tage</span>
+            </div>
+            <div class="countdown-unit">
+              <span class="countdown-value">${pad(cd.hours)}</span>
+              <span class="countdown-unit-label">Std</span>
+            </div>
+            <div class="countdown-unit">
+              <span class="countdown-value">${pad(cd.minutes)}</span>
+              <span class="countdown-unit-label">Min</span>
+            </div>
+            <div class="countdown-unit">
+              <span class="countdown-value">${pad(cd.seconds)}</span>
+              <span class="countdown-unit-label">Sek</span>
+            </div>
           </div>
         </div>
       </div>

@@ -581,7 +581,7 @@ h4 { font-size: 1rem; }
 /* --- Race Header --- */
 .race-header {
   text-align: center;
-  padding: var(--space-xl) 0;
+  padding: var(--space-xl) 0 var(--space-lg);
 }
 
 .race-flag {
@@ -591,6 +591,7 @@ h4 { font-size: 1rem; }
 
 .race-name {
   font-size: 1.8rem;
+  margin-bottom: var(--space-sm);
 }
 
 .race-info {
@@ -601,6 +602,31 @@ h4 { font-size: 1rem; }
 
 .race-status {
   margin-top: var(--space-md);
+}
+
+/* Race countdown card on detail page */
+.race-countdown-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-lg);
+}
+
+.race-countdown-card .countdown {
+  padding: var(--space-lg) var(--space-xl);
+}
+
+.race-countdown-card .countdown-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  font-size: 0.9rem;
+}
+
+.race-countdown-card .countdown-timer {
+  gap: var(--space-xl);
 }
 
 /* --- Result Card --- */
