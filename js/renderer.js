@@ -773,7 +773,7 @@ function getTeamForDriver(season, driverId) {
   return season.teams.find(t => t.id === driver.team) || null;
 }
 
-function driverSearchSelect(season, name, selected, required = false) {
+function driverSearchSelect(season, name, selected, required = false, group = '') {
   const id = `ss-${name}-${++searchSelectCounter}`;
   const selDriver = season.drivers.find(d => d.id === selected);
   const selTeam = selDriver ? getTeamForDriver(season, selDriver.id) : null;
@@ -796,7 +796,7 @@ function driverSearchSelect(season, name, selected, required = false) {
     </div>`;
   }).join('');
 
-  return `<div class="search-select" id="${id}" data-name="${name}" data-value="${selected || ''}" ${required ? 'data-required="true"' : ''}>
+  return `<div class="search-select" id="${id}" data-name="${name}" data-value="${selected || ''}" ${required ? 'data-required="true"' : ''} ${group ? `data-group="${group}"` : ''}>
     <div class="search-select-trigger">${displayHtml}<span class="ss-arrow">▼</span></div>
     <div class="search-select-dropdown">
       <div class="ss-search"><input type="text" placeholder="Suchen..." autocomplete="off"></div>
@@ -836,6 +836,28 @@ function teamSearchSelect(season, name, selected, required = false) {
  * Initialize all search-select dropdowns within a container.
  */
 function initSearchSelects(container) {
+  // Group exclusion: hide options already selected in sibling dropdowns
+  function updateGroupExclusions() {
+    const groups = {};
+    container.querySelectorAll('.search-select[data-group]').forEach(ss => {
+      const g = ss.dataset.group;
+      if (!g) return;
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(ss);
+    });
+    for (const selects of Object.values(groups)) {
+      const taken = new Set();
+      selects.forEach(ss => { if (ss.dataset.value) taken.add(ss.dataset.value); });
+      selects.forEach(ss => {
+        const own = ss.dataset.value;
+        ss.querySelectorAll('.ss-option').forEach(opt => {
+          const isTaken = taken.has(opt.dataset.value) && opt.dataset.value !== own;
+          opt.classList.toggle('ss-excluded', isTaken);
+        });
+      });
+    }
+  }
+
   container.querySelectorAll('.search-select').forEach(ss => {
     const trigger = ss.querySelector('.search-select-trigger');
     const dropdown = ss.querySelector('.search-select-dropdown');
@@ -851,6 +873,7 @@ function initSearchSelects(container) {
       ss.classList.add('open');
       trigger.classList.add('open');
       searchInput.value = '';
+      updateGroupExclusions();
       filterOptions('');
       setTimeout(() => searchInput.focus(), 10);
     }
@@ -865,7 +888,8 @@ function initSearchSelects(container) {
       const q = query.toLowerCase();
       let visible = 0;
       allOptions.forEach(opt => {
-        const match = !q || opt.dataset.search.includes(q);
+        const excluded = opt.classList.contains('ss-excluded');
+        const match = !excluded && (!q || opt.dataset.search.includes(q));
         opt.style.display = match ? '' : 'none';
         if (match) visible++;
       });
@@ -904,6 +928,7 @@ function initSearchSelects(container) {
       opt.classList.add('selected');
 
       close();
+      updateGroupExclusions();
     }
 
     trigger.addEventListener('click', (e) => {
@@ -922,6 +947,9 @@ function initSearchSelects(container) {
       });
     });
   });
+
+  // Initial exclusion update (for pre-filled values)
+  updateGroupExclusions();
 
   // Close on outside click
   document.addEventListener('click', () => {
@@ -985,15 +1013,15 @@ function renderTipForm(season, race, predictions, results, data) {
       <div id="race-tip-form" class="admin-form-grid">
         <div class="form-group">
           <label class="form-label">${tipLabel('Rennsieger (= P1)', TIP_HINTS.winner)}</label>
-          ${driverSearchSelect(season, 'winner', existing?.winner, true)}
+          ${driverSearchSelect(season, 'winner', existing?.winner, true, 'podium')}
         </div>
         <div class="form-group">
           <label class="form-label">${tipLabel('Podium P2', TIP_HINTS.podium1)}</label>
-          ${driverSearchSelect(season, 'podium_1', existing?.podium?.[1], true)}
+          ${driverSearchSelect(season, 'podium_1', existing?.podium?.[1], true, 'podium')}
         </div>
         <div class="form-group">
           <label class="form-label">${tipLabel('Podium P3', TIP_HINTS.podium2)}</label>
-          ${driverSearchSelect(season, 'podium_2', existing?.podium?.[2], true)}
+          ${driverSearchSelect(season, 'podium_2', existing?.podium?.[2], true, 'podium')}
         </div>
         <div class="form-group">
           <label class="form-label">${tipLabel('Pole Position', TIP_HINTS.pole)}</label>
@@ -1099,15 +1127,15 @@ function renderSprintTipForm(season, race, sprintPredictions, sprintResults, dat
       <div id="sprint-tip-form" class="admin-form-grid">
         <div class="form-group">
           <label class="form-label">${tipLabel('Sprint-Sieger (= P1)', TIP_HINTS.sprintWinner)}</label>
-          ${driverSearchSelect(season, 'winner', existing?.winner, true)}
+          ${driverSearchSelect(season, 'winner', existing?.winner, true, 'sprint-podium')}
         </div>
         <div class="form-group">
           <label class="form-label">${tipLabel('Sprint P2', TIP_HINTS.sprintP1)}</label>
-          ${driverSearchSelect(season, 'podium_1', existing?.podium?.[1], true)}
+          ${driverSearchSelect(season, 'podium_1', existing?.podium?.[1], true, 'sprint-podium')}
         </div>
         <div class="form-group">
           <label class="form-label">${tipLabel('Sprint P3', TIP_HINTS.sprintP2)}</label>
-          ${driverSearchSelect(season, 'podium_2', existing?.podium?.[2], true)}
+          ${driverSearchSelect(season, 'podium_2', existing?.podium?.[2], true, 'sprint-podium')}
         </div>
         <div class="form-actions">
           <button type="button" class="btn btn-primary" id="sprint-tip-submit">Sprint-Tipp abgeben</button>
