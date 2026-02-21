@@ -426,8 +426,7 @@ function renderRacePredictions(season, race, predictions, results) {
   }
 
   const categories = [
-    { key: 'winner', label: 'Rennsieger', format: id => driverLastName(season, id) },
-    { key: 'podium-1', label: 'Podium P1', format: (_, pred) => pred?.podium?.[0] ? driverLastName(season, pred.podium[0]) : '-' },
+    { key: 'winner', label: 'Rennsieger (= P1)', format: id => driverLastName(season, id) },
     { key: 'podium-2', label: 'Podium P2', format: (_, pred) => pred?.podium?.[1] ? driverLastName(season, pred.podium[1]) : '-' },
     { key: 'podium-3', label: 'Podium P3', format: (_, pred) => pred?.podium?.[2] ? driverLastName(season, pred.podium[2]) : '-' },
     { key: 'pole', label: 'Pole Position', format: id => driverLastName(season, id) },
@@ -455,7 +454,7 @@ function renderRacePredictions(season, race, predictions, results) {
       if (pred) {
         const late = isLate(pred.submittedAt, race.raceStartUTC);
 
-        if (cat.key === 'podium-1' || cat.key === 'podium-2' || cat.key === 'podium-3') {
+        if (cat.key === 'podium-2' || cat.key === 'podium-3') {
           value = cat.format(null, pred);
         } else {
           value = pred[cat.key] ? cat.format(pred[cat.key]) : '-';
@@ -485,8 +484,7 @@ function renderRacePredictions(season, race, predictions, results) {
 
     if (result) {
       let resultValue = '-';
-      if (cat.key === 'podium-1') resultValue = result.podium?.[0] ? driverLastName(season, result.podium[0]) : '-';
-      else if (cat.key === 'podium-2') resultValue = result.podium?.[1] ? driverLastName(season, result.podium[1]) : '-';
+      if (cat.key === 'podium-2') resultValue = result.podium?.[1] ? driverLastName(season, result.podium[1]) : '-';
       else if (cat.key === 'podium-3') resultValue = result.podium?.[2] ? driverLastName(season, result.podium[2]) : '-';
       else if (cat.key === 'bestConstructor') resultValue = result[cat.key] ? teamName(season, result[cat.key]) : '-';
       else resultValue = result[cat.key] ? driverLastName(season, result[cat.key]) : '-';
@@ -502,7 +500,6 @@ function renderRacePredictions(season, race, predictions, results) {
 
 function checkCategoryCorrect(key, pred, result) {
   if (key === 'winner') return pred.winner === result.winner;
-  if (key === 'podium-1') return pred.podium?.[0] === result.podium?.[0];
   if (key === 'podium-2') return pred.podium?.[1] === result.podium?.[1];
   if (key === 'podium-3') return pred.podium?.[2] === result.podium?.[2];
   if (key === 'pole') return pred.pole === result.pole;
@@ -513,7 +510,6 @@ function checkCategoryCorrect(key, pred, result) {
 
 function checkCategoryPartial(key, pred, result) {
   // Partial: podium driver is on podium but wrong position
-  if (key === 'podium-1' && pred.podium?.[0] && result.podium?.includes(pred.podium[0]) && pred.podium[0] !== result.podium[0]) return true;
   if (key === 'podium-2' && pred.podium?.[1] && result.podium?.includes(pred.podium[1]) && pred.podium[1] !== result.podium[1]) return true;
   if (key === 'podium-3' && pred.podium?.[2] && result.podium?.includes(pred.podium[2]) && pred.podium[2] !== result.podium[2]) return true;
   return false;
@@ -540,8 +536,7 @@ function renderSprintPredictions(season, race, sprintPredictions, sprintResults)
   }
 
   const categories = [
-    { key: 'winner', label: 'Sprint-Sieger', format: id => driverLastName(season, id) },
-    { key: 'podium-1', label: 'Sprint P1', format: (_, pred) => pred?.podium?.[0] ? driverLastName(season, pred.podium[0]) : '-' },
+    { key: 'winner', label: 'Sprint-Sieger (= P1)', format: id => driverLastName(season, id) },
     { key: 'podium-2', label: 'Sprint P2', format: (_, pred) => pred?.podium?.[1] ? driverLastName(season, pred.podium[1]) : '-' },
     { key: 'podium-3', label: 'Sprint P3', format: (_, pred) => pred?.podium?.[2] ? driverLastName(season, pred.podium[2]) : '-' },
   ];
@@ -597,8 +592,10 @@ function renderSprintPredictions(season, race, sprintPredictions, sprintResults)
     }
 
     if (result) {
-      const idx = categories.indexOf(cat);
-      const resDriver = result.podium?.[idx] ? driverLastName(season, result.podium[idx]) : '-';
+      let resDriver = '-';
+      if (cat.key === 'winner') resDriver = result.winner ? driverLastName(season, result.winner) : '-';
+      else if (cat.key === 'podium-2') resDriver = result.podium?.[1] ? driverLastName(season, result.podium[1]) : '-';
+      else if (cat.key === 'podium-3') resDriver = result.podium?.[2] ? driverLastName(season, result.podium[2]) : '-';
       html += `<td class="fw-bold">${resDriver}</td>`;
     }
 
