@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F1 Kick Tip 2026 – Admin</title>
+  <meta name="description" content="Admin-Bereich: Tipps, Ergebnisse & Spielerverwaltung">
+  <meta name="theme-color" content="#E10600">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F527;</text></svg>">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="admin">
+
+  <div class="admin-banner">Admin-Modus – Daten werden lokal bearbeitet, nicht automatisch gespeichert</div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="site-logo">
+        <span class="logo-f1">F1</span> Kick Tip 2026
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Dashboard</a></li>
+          <li><a href="saison.html">Saison-Tipps</a></li>
+          <li><a href="regeln.html">Regeln</a></li>
+          <li><a href="admin.html" class="active">Admin</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: var(--space-xl); padding-bottom: var(--space-xl);">
+
+    <!-- Tab Navigation -->
+    <nav class="admin-tabs">
+      <button class="admin-tab active" data-tab="results">Rennergebnisse</button>
+      <button class="admin-tab" data-tab="predictions">Renntipps</button>
+      <button class="admin-tab" data-tab="sprint-results">Sprint-Ergebnisse</button>
+      <button class="admin-tab" data-tab="sprint-predictions">Sprint-Tipps</button>
+      <button class="admin-tab" data-tab="season">Saison & Spieler</button>
+    </nav>
+
+    <!-- Tab Panels -->
+    <div id="panel-results" class="admin-panel active"></div>
+    <div id="panel-predictions" class="admin-panel"></div>
+    <div id="panel-sprint-results" class="admin-panel"></div>
+    <div id="panel-sprint-predictions" class="admin-panel"></div>
+    <div id="panel-season" class="admin-panel"></div>
+
+    <!-- Export Section -->
+    <section class="section" style="margin-top: var(--space-2xl);">
+      <h2 class="section-title">Daten exportieren</h2>
+      <div class="admin-export-buttons">
+        <button class="btn btn-secondary" data-export="results">results.json</button>
+        <button class="btn btn-secondary" data-export="predictions">predictions.json</button>
+        <button class="btn btn-secondary" data-export="sprint-results">sprint-results.json</button>
+        <button class="btn btn-secondary" data-export="sprint-predictions">sprint-predictions.json</button>
+        <button class="btn btn-secondary" data-export="season-predictions">season-predictions.json</button>
+        <button class="btn btn-secondary" data-export="season">season.json</button>
+        <button class="btn btn-primary" data-export="all">Alle herunterladen</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      F1 Kick Tip 2026 &middot; Admin-Bereich &middot;
+      <a href="index.html">Zurück zum Dashboard</a>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

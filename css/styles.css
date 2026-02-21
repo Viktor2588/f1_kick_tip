@@ -851,3 +851,281 @@ h4 { font-size: 1rem; }
 .loading {
   animation: pulse 1.5s ease-in-out infinite;
 }
+
+/* ========================================
+   Admin Page Styles
+   ======================================== */
+
+/* --- Admin Banner --- */
+.admin-banner {
+  background: var(--f1-red);
+  color: #fff;
+  text-align: center;
+  padding: var(--space-xs) var(--space-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* --- Admin Tabs --- */
+.admin-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xl);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: var(--space-xs);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-tab {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.admin-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.admin-tab.active {
+  color: #fff;
+  background: var(--f1-red);
+}
+
+/* --- Admin Panels --- */
+.admin-panel {
+  display: none;
+}
+
+.admin-panel.active {
+  display: block;
+  animation: fadeIn 0.2s ease forwards;
+}
+
+/* --- Form Elements --- */
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+@media (min-width: 768px) {
+  .admin-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-form-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-select,
+.form-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: var(--space-sm) var(--space-md);
+  transition: border-color var(--transition-fast);
+  width: 100%;
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: var(--f1-red);
+}
+
+.form-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: var(--space-sm) var(--space-lg);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--f1-red);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--f1-red-dark);
+}
+
+.btn-secondary {
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+}
+
+.btn-danger {
+  background: rgba(255, 82, 82, 0.15);
+  color: var(--color-error);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+}
+
+.btn-danger:hover {
+  background: rgba(255, 82, 82, 0.25);
+}
+
+.btn-sm {
+  font-size: 0.75rem;
+  padding: var(--space-xs) var(--space-sm);
+}
+
+/* --- Form Actions --- */
+.form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+}
+
+/* --- Player Form Cards --- */
+.admin-player-form {
+  border-left-width: 4px !important;
+  border-left-style: solid !important;
+}
+
+/* --- Player Row --- */
+.admin-player-row {
+  padding: var(--space-md) var(--space-lg);
+}
+
+/* --- Export Buttons --- */
+.admin-export-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* --- Toast Notifications --- */
+#toast-container {
+  position: fixed;
+  bottom: var(--space-xl);
+  right: var(--space-xl);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.admin-notification {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+  max-width: 350px;
+}
+
+.admin-notification.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.admin-notification.success {
+  background: rgba(0, 230, 118, 0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.admin-notification.error {
+  background: rgba(255, 82, 82, 0.15);
+  color: var(--color-error);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+}
+
+.admin-notification.info {
+  background: rgba(64, 196, 255, 0.15);
+  color: var(--color-info);
+  border: 1px solid rgba(64, 196, 255, 0.3);
+}
+
+/* --- Admin Responsive --- */
+@media (max-width: 767px) {
+  .admin-tabs {
+    gap: 2px;
+  }
+
+  .admin-tab {
+    font-size: 0.75rem;
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .admin-export-buttons {
+    flex-direction: column;
+  }
+
+  .admin-export-buttons .btn {
+    width: 100%;
+  }
+
+  #toast-container {
+    left: var(--space-md);
+    right: var(--space-md);
+    bottom: var(--space-md);
+  }
+
+  .admin-notification {
+    max-width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+}
