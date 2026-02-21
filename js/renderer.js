@@ -574,6 +574,10 @@ function renderSprintPredictions(season, race, sprintPredictions, sprintResults)
   const container = document.getElementById('sprint-predictions');
   if (!container) return;
 
+  // Show the hidden section wrapper
+  const section = document.getElementById('sprint-predictions-section');
+  if (section) section.style.display = '';
+
   const roundStr = String(race.round);
   const result = sprintResults.sprintResults?.[roundStr] || null;
   const players = season.players;
@@ -1355,6 +1359,14 @@ export function renderSeasonPage(data) {
   }
   html += '</section>';
 
+  // Race calendar
+  html += `
+    <section class="section">
+      <h2 class="section-title">Rennkalender 2026</h2>
+      <div id="calendar" class="calendar-grid"></div>
+    </section>
+  `;
+
   container.innerHTML = html;
 
   // Render tip forms into the containers
@@ -1367,6 +1379,7 @@ export function renderSeasonPage(data) {
   if (!seasonLocked) {
     renderSeasonTipForm(season, seasonPredictions);
   }
+  renderCalendar(season, results);
 }
 
 function renderSeasonTipForm(season, seasonPredictions) {
