@@ -11,6 +11,10 @@
 </head>
 <body data-page="dashboard" data-base-path="data/test/">
 
+  <div style="background: #FF8C00; color: #fff; text-align: center; padding: 0.5rem; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em;">
+    TEST MODE – Demodaten
+  </div>
+
   <header class="site-header">
     <div class="container header-inner">
       <a href="test.html" class="site-logo">
@@ -19,16 +23,13 @@
       <nav>
         <ul class="nav-links">
           <li><a href="test.html" class="active">Dashboard</a></li>
-          <li><a href="test-saison.html">Saison-Tipps</a></li>
+          <li><a href="test-saison.html">Tipps</a></li>
           <li><a href="regeln.html">Regeln</a></li>
         </ul>
       </nav>
+      <div id="header-info"></div>
     </div>
   </header>
-
-  <div style="background: #FF8C00; color: #fff; text-align: center; padding: 0.5rem; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em;">
-    TEST MODE – Demodaten
-  </div>
 
   <main class="container" style="padding-top: var(--space-xl); padding-bottom: var(--space-xl);">
 
@@ -36,21 +37,23 @@
     <section class="section">
       <h2 class="section-title">Leaderboard</h2>
       <div id="leaderboard" class="grid grid-3">
-        <div class="card loading" style="height: 180px;"></div>
-        <div class="card loading" style="height: 180px;"></div>
-        <div class="card loading" style="height: 180px;"></div>
+        <div class="card loading" style="height: 180px;">
+          <div class="loading-state"><div class="loading-spinner"></div></div>
+        </div>
+        <div class="card loading" style="height: 180px;">
+          <div class="loading-state"><div class="loading-spinner"></div></div>
+        </div>
+        <div class="card loading" style="height: 180px;">
+          <div class="loading-state"><div class="loading-spinner"></div></div>
+        </div>
       </div>
     </section>
 
-    <!-- Season Progress + Countdown -->
+    <!-- Tip Status -->
     <section class="section">
-      <div class="grid grid-2">
-        <div class="card">
-          <div id="season-progress" class="loading">Lade...</div>
-        </div>
-        <div class="card">
-          <div id="countdown" class="loading">Lade...</div>
-        </div>
+      <h2 class="section-title">Tipp-Status</h2>
+      <div id="tip-status">
+        <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Tipp-Status...</div></div>
       </div>
     </section>
 
@@ -58,7 +61,9 @@
     <section class="section">
       <h2 class="section-title">Letzte Ergebnisse</h2>
       <div id="recent-results" class="recent-results">
-        <div class="card loading" style="height: 120px;"></div>
+        <div class="card loading" style="height: 120px;">
+          <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Ergebnisse...</div></div>
+        </div>
       </div>
     </section>
 
@@ -74,7 +79,9 @@
     <section class="section">
       <h2 class="section-title">Saison-Tipps</h2>
       <div id="season-tips">
-        <div class="card loading" style="height: 120px;"></div>
+        <div class="card loading" style="height: 120px;">
+          <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Saison-Tipps...</div></div>
+        </div>
       </div>
     </section>
 
@@ -82,7 +89,8 @@
 
   <footer class="site-footer">
     <div class="container">
-      F1 Kick Tip 2026 &middot; Thomas, Julia & Viktor
+      F1 Kick Tip 2026 &middot; Thomas, Julia & Viktor &middot;
+      <a href="index.html">Live-Modus</a>
     </div>
   </footer>
 

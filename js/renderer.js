@@ -239,6 +239,8 @@ function renderCalendar(season, results) {
   const container = document.getElementById('calendar');
   if (!container) return;
 
+  const isTest = !!document.body.dataset.basePath;
+  const racePageUrl = isTest ? 'test-rennen.html' : 'rennen.html';
   const now = new Date();
   let activeFound = false;
 
@@ -254,7 +256,7 @@ function renderCalendar(season, results) {
     }
 
     return `
-      <a href="rennen.html?runde=${race.round}" class="calendar-race ${statusClass}">
+      <a href="${racePageUrl}?runde=${race.round}" class="calendar-race ${statusClass}">
         ${race.sprint ? '<span class="calendar-sprint"><span class="sprint-badge">Sprint</span></span>' : ''}
         <div class="calendar-round">Runde ${race.round}</div>
         <div class="calendar-flag">${countryFlag(race.countryCode)}</div>

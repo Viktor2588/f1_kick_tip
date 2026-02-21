@@ -11,6 +11,10 @@
 </head>
 <body data-page="rennen" data-base-path="data/test/">
 
+  <div style="background: #FF8C00; color: #fff; text-align: center; padding: 0.5rem; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em;">
+    TEST MODE – Demodaten
+  </div>
+
   <header class="site-header">
     <div class="container header-inner">
       <a href="test.html" class="site-logo">
@@ -19,26 +23,38 @@
       <nav>
         <ul class="nav-links">
           <li><a href="test.html">Dashboard</a></li>
-          <li><a href="test-saison.html">Saison-Tipps</a></li>
+          <li><a href="test-saison.html">Tipps</a></li>
           <li><a href="regeln.html">Regeln</a></li>
         </ul>
       </nav>
+      <div id="header-info"></div>
     </div>
   </header>
-
-  <div style="background: #FF8C00; color: #fff; text-align: center; padding: 0.5rem; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em;">
-    TEST MODE – Demodaten
-  </div>
 
   <main class="container" style="padding-top: var(--space-xl); padding-bottom: var(--space-xl);">
     <div id="race-content">
 
       <!-- Race Header -->
-      <div id="race-header" class="loading" style="height: 150px;"></div>
+      <div id="race-header">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Lade Renndaten...</div>
+        </div>
+      </div>
 
       <!-- Countdown -->
       <section class="section">
         <div id="race-countdown"></div>
+      </section>
+
+      <!-- Tip Form (shown when deadline is open) -->
+      <section class="section">
+        <div id="tip-form-section"></div>
+      </section>
+
+      <!-- Sprint Tip Form (shown when sprint deadline is open) -->
+      <section class="section">
+        <div id="sprint-tip-form-section"></div>
       </section>
 
       <!-- Race Predictions Comparison -->
@@ -50,7 +66,7 @@
       </section>
 
       <!-- Sprint Predictions (conditional) -->
-      <section class="section">
+      <section class="section" id="sprint-predictions-section" style="display: none;">
         <div class="card" style="overflow-x: auto;">
           <div id="sprint-predictions"></div>
         </div>
@@ -72,7 +88,8 @@
   <footer class="site-footer">
     <div class="container">
       F1 Kick Tip 2026 &middot; Thomas, Julia & Viktor &middot;
-      <a href="test.html">Zurück zum Dashboard</a>
+      <a href="test.html">Zurück zum Dashboard</a> &middot;
+      <a href="index.html">Live-Modus</a>
     </div>
   </footer>
 

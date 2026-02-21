@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TEST – Saison-Tipps – F1 Kick Tip 2026</title>
-  <meta name="description" content="Saison-Tipps WDC & WCC im F1 Tippspiel 2026 – Testseite">
+  <title>TEST – Tipps – F1 Kick Tip 2026</title>
+  <meta name="description" content="Tipps im F1 Tippspiel 2026 – Testseite">
   <meta name="theme-color" content="#E10600">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body data-page="saison" data-base-path="data/test/">
+
+  <div style="background: #FF8C00; color: #fff; text-align: center; padding: 0.5rem; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em;">
+    TEST MODE – Demodaten
+  </div>
 
   <header class="site-header">
     <div class="container header-inner">
@@ -19,27 +23,28 @@
       <nav>
         <ul class="nav-links">
           <li><a href="test.html">Dashboard</a></li>
-          <li><a href="test-saison.html" class="active">Saison-Tipps</a></li>
+          <li><a href="test-saison.html" class="active">Tipps</a></li>
           <li><a href="regeln.html">Regeln</a></li>
         </ul>
       </nav>
+      <div id="header-info"></div>
     </div>
   </header>
 
-  <div style="background: #FF8C00; color: #fff; text-align: center; padding: 0.5rem; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em;">
-    TEST MODE – Demodaten
-  </div>
-
   <main class="container" style="padding-top: var(--space-xl); padding-bottom: var(--space-xl);">
-    <div id="season-content" class="loading">
-      <div style="height: 300px;"></div>
+    <div id="season-content">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Lade Tipps...</div>
+      </div>
     </div>
   </main>
 
   <footer class="site-footer">
     <div class="container">
       F1 Kick Tip 2026 &middot; Thomas, Julia & Viktor &middot;
-      <a href="test.html">Zurück zum Dashboard</a>
+      <a href="test.html">Zurück zum Dashboard</a> &middot;
+      <a href="index.html">Live-Modus</a>
     </div>
   </footer>
 
