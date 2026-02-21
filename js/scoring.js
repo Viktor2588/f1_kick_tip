@@ -10,14 +10,16 @@ import { isLate } from './utils.js';
  * Returns { total, breakdown, isPerfect }
  *
  * Breakdown keys:
- *   winner (0|5), podiumP1 (0|3), podiumP2 (0|2), podiumP3 (0|2),
- *   podiumBonus (0-3), pole (0|3), fastestLap (0|3),
+ *   winner (0|3), podiumP2 (0|2), podiumP3 (0|2),
+ *   podiumBonus (0-2), pole (0|3), fastestLap (0|3),
  *   bestConstructor (0|3), perfectRound (0|5)
+ *
+ * Winner = P1 (merged), so no separate podiumP1.
+ * Max per race: 3+2+2+3+3+3+5 = 21
  */
 export function scoreRace(prediction, result, race) {
   const breakdown = {
     winner: 0,
-    podiumP1: 0,
     podiumP2: 0,
     podiumP3: 0,
     podiumBonus: 0,
@@ -34,26 +36,23 @@ export function scoreRace(prediction, result, race) {
     return { total: 0, breakdown, isPerfect: false, late: true };
   }
 
-  // Winner (5 pts)
+  // Winner = P1 (3 pts)
   if (prediction.winner === result.winner) {
-    breakdown.winner = 5;
+    breakdown.winner = 3;
   }
 
-  // Podium exact positions
+  // Podium exact positions (P2 & P3 only; P1 = winner)
   const predPodium = prediction.podium || [];
   const resPodium = result.podium || [];
 
-  if (predPodium[0] === resPodium[0]) breakdown.podiumP1 = 3;
   if (predPodium[1] === resPodium[1]) breakdown.podiumP2 = 2;
   if (predPodium[2] === resPodium[2]) breakdown.podiumP3 = 2;
 
-  // Podium bonus: driver on podium but wrong position (1 pt each)
-  for (let i = 0; i < 3; i++) {
+  // Podium bonus: driver on podium but wrong position (1 pt each, P2/P3 only)
+  for (let i = 1; i < 3; i++) {
     const pred = predPodium[i];
     if (!pred) continue;
-    // Only award bonus if position was NOT exact
     const exactOnThisPos =
-      (i === 0 && breakdown.podiumP1 > 0) ||
       (i === 1 && breakdown.podiumP2 > 0) ||
       (i === 2 && breakdown.podiumP3 > 0);
     if (!exactOnThisPos && resPodium.includes(pred)) {
@@ -77,11 +76,11 @@ export function scoreRace(prediction, result, race) {
   }
 
   // Perfect round check: ALL categories correct
-  // Winner + all 3 podium exact + pole + fastest lap + best constructor
-  const allPodiumExact = breakdown.podiumP1 === 3 && breakdown.podiumP2 === 2 && breakdown.podiumP3 === 2;
+  // Winner(=P1) + P2 + P3 exact + pole + fastest lap + best constructor
   const isPerfect =
-    breakdown.winner === 5 &&
-    allPodiumExact &&
+    breakdown.winner === 3 &&
+    breakdown.podiumP2 === 2 &&
+    breakdown.podiumP3 === 2 &&
     breakdown.pole === 3 &&
     breakdown.fastestLap === 3 &&
     breakdown.bestConstructor === 3;
@@ -233,7 +232,7 @@ export function calculateStandings(season, predictions, sprintPredictions, resul
         const score = scoreRace(pred, result, race);
         raceScores[race.round] = score;
         racePoints += score.total;
-        if (score.breakdown.winner === 5) correctWinners++;
+        if (score.breakdown.winner === 3) correctWinners++;
         if (score.isPerfect) perfectRounds++;
         if (score.breakdown.pole === 3) correctPoles++;
       }
@@ -296,8 +295,8 @@ export function calculateAccuracy(raceScores, sprintScores) {
 
   if (raceCount === 0 && sprintCount === 0) return 0;
 
-  const maxRace = raceCount * 26; // max 26 per race
-  const maxSprint = sprintCount * 8; // max 8 per sprint
+  const maxRace = raceCount * 21; // max 21 per race
+  const maxSprint = sprintCount * 7; // max 7 per sprint
   const maxTotal = maxRace + maxSprint;
 
   if (maxTotal === 0) return 0;

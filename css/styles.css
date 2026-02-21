@@ -187,6 +187,13 @@ h4 { font-size: 1rem; }
   color: var(--f1-red);
 }
 
+/* Dashboard Hero (below header) */
+.dashboard-hero {
+  background: var(--bg-secondary);
+  padding: var(--space-lg) 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
 .nav-links {
   display: flex;
   list-style: none;
@@ -713,11 +720,60 @@ h4 { font-size: 1rem; }
 }
 
 .season-tip-value.masked-tip {
-  color: var(--accent);
+  color: var(--f1-red);
   font-size: 0.9rem;
   font-weight: 600;
   opacity: 0.7;
   letter-spacing: 0.05em;
+}
+
+/* Tip Status */
+.tip-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-md);
+}
+
+.tip-status-card {
+  padding: var(--space-md) var(--space-lg);
+}
+
+.tip-status-card h4 {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+  color: var(--text-secondary);
+}
+
+.tip-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.tip-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.tip-status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.tip-status-badge.tipped {
+  background: rgba(0, 230, 118, 0.15);
+  color: var(--color-success);
+}
+
+.tip-status-badge.missing {
+  background: rgba(255, 82, 82, 0.15);
+  color: var(--color-error);
 }
 
 /* --- Rules Page --- */

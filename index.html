@@ -22,12 +22,26 @@
       <nav>
         <ul class="nav-links">
           <li><a href="index.html" class="active">Dashboard</a></li>
-          <li><a href="saison.html">Saison-Tipps</a></li>
+          <li><a href="saison.html">Tipps</a></li>
           <li><a href="regeln.html">Regeln</a></li>
         </ul>
       </nav>
     </div>
   </header>
+
+  <!-- Dashboard Hero: Season Progress + Next Race Countdown -->
+  <div class="dashboard-hero">
+    <div class="container">
+      <div class="grid grid-2">
+        <div id="season-progress">
+          <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Fortschritt...</div></div>
+        </div>
+        <div id="countdown">
+          <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Countdown...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <main class="container" style="padding-top: var(--space-xl); padding-bottom: var(--space-xl);">
 
@@ -47,19 +61,11 @@
       </div>
     </section>
 
-    <!-- Season Progress + Countdown -->
+    <!-- Tip Status -->
     <section class="section">
-      <div class="grid grid-2">
-        <div class="card">
-          <div id="season-progress">
-            <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Fortschritt...</div></div>
-          </div>
-        </div>
-        <div class="card">
-          <div id="countdown">
-            <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Countdown...</div></div>
-          </div>
-        </div>
+      <h2 class="section-title">Tipp-Status</h2>
+      <div id="tip-status">
+        <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Tipp-Status...</div></div>
       </div>
     </section>
 

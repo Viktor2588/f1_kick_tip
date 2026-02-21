@@ -31,6 +31,7 @@ export function renderDashboard(data) {
   renderLeaderboard(season, standings);
   renderSeasonProgress(season, results);
   renderCountdown(season, results);
+  renderTipStatus(season, predictions, sprintPredictions, seasonPredictions, results);
   renderRecentResults(season, predictions, results, standings, data);
   renderCalendar(season, results);
   renderSeasonTips(season, seasonPredictions, results);
@@ -134,6 +135,76 @@ function renderCountdown(season, results) {
 
   update();
   setInterval(update, 1000);
+}
+
+function renderTipStatus(season, predictions, sprintPredictions, seasonPredictions, results) {
+  const container = document.getElementById('tip-status');
+  if (!container) return;
+
+  const players = season.players;
+  const nextRace = getNextRace(season, results);
+  const preds = predictions.predictions || {};
+  const sprintPreds = sprintPredictions.sprintPredictions || {};
+  const seasonPreds = seasonPredictions.seasonPredictions || {};
+
+  let cards = '';
+
+  // Next race tip status
+  if (nextRace) {
+    const roundStr = String(nextRace.round);
+    const roundPreds = preds[roundStr] || {};
+    cards += `
+      <div class="card tip-status-card">
+        <h4>${countryFlag(nextRace.countryCode)} Runde ${nextRace.round} – ${nextRace.name}</h4>
+        <div class="tip-status-list">
+          ${players.map(p => {
+            const hasTip = !!roundPreds[p.id];
+            return `<div class="tip-status-row">
+              <span>${p.emoji} ${p.name}</span>
+              <span class="tip-status-badge ${hasTip ? 'tipped' : 'missing'}">${hasTip ? 'Getippt' : 'Fehlt'}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+
+    // Sprint tip status (if sprint weekend)
+    if (nextRace.sprint) {
+      const sprintRoundPreds = sprintPreds[roundStr] || {};
+      cards += `
+        <div class="card tip-status-card">
+          <h4>${countryFlag(nextRace.countryCode)} Sprint – Runde ${nextRace.round}</h4>
+          <div class="tip-status-list">
+            ${players.map(p => {
+              const hasTip = !!sprintRoundPreds[p.id];
+              return `<div class="tip-status-row">
+                <span>${p.emoji} ${p.name}</span>
+                <span class="tip-status-badge ${hasTip ? 'tipped' : 'missing'}">${hasTip ? 'Getippt' : 'Fehlt'}</span>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Season tip status
+  cards += `
+    <div class="card tip-status-card">
+      <h4>Saison-Tipps (WDC & WCC)</h4>
+      <div class="tip-status-list">
+        ${players.map(p => {
+          const hasTip = !!seasonPreds[p.id];
+          return `<div class="tip-status-row">
+            <span>${p.emoji} ${p.name}</span>
+            <span class="tip-status-badge ${hasTip ? 'tipped' : 'missing'}">${hasTip ? 'Getippt' : 'Fehlt'}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = `<div class="tip-status-grid">${cards}</div>`;
 }
 
 function renderRecentResults(season, predictions, results, standings, data) {
@@ -701,8 +772,7 @@ function renderRacePointsBreakdown(season, race, predictions, results, sprintPre
           ${score?.late ? '<span class="late-badge">Verspätet</span>' : ''}
         </div>
         ${score && !score.late ? `
-        <div class="points-row"><span>Rennsieger</span><span class="points-value ${score.breakdown.winner > 0 ? 'positive' : 'zero'}">${score.breakdown.winner}</span></div>
-        <div class="points-row"><span>Podium P1</span><span class="points-value ${score.breakdown.podiumP1 > 0 ? 'positive' : 'zero'}">${score.breakdown.podiumP1}</span></div>
+        <div class="points-row"><span>Rennsieger (= P1)</span><span class="points-value ${score.breakdown.winner > 0 ? 'positive' : 'zero'}">${score.breakdown.winner}</span></div>
         <div class="points-row"><span>Podium P2</span><span class="points-value ${score.breakdown.podiumP2 > 0 ? 'positive' : 'zero'}">${score.breakdown.podiumP2}</span></div>
         <div class="points-row"><span>Podium P3</span><span class="points-value ${score.breakdown.podiumP3 > 0 ? 'positive' : 'zero'}">${score.breakdown.podiumP3}</span></div>
         <div class="points-row"><span>Podium-Bonus</span><span class="points-value ${score.breakdown.podiumBonus > 0 ? 'positive' : 'zero'}">${score.breakdown.podiumBonus}</span></div>
@@ -739,7 +809,7 @@ function tipLabel(text, tooltip) {
 
 // Tooltip texts for each tip category
 const TIP_HINTS = {
-  winner: '5 Punkte für den richtigen Rennsieger. Zählt automatisch auch als Podium P1 (3 Bonus-Punkte).',
+  winner: '3 Punkte für den richtigen Rennsieger (= Podium P1).',
   podium1: '2 Punkte bei richtiger Position. 1 Punkt wenn der Fahrer auf dem Podium landet, aber auf einer anderen Position.',
   podium2: '2 Punkte bei richtiger Position. 1 Punkt wenn der Fahrer auf dem Podium landet, aber auf einer anderen Position.',
   pole: '3 Punkte wenn du den Pole-Sitter richtig tippst. Das ist der Fahrer, der im Qualifying die schnellste Runde fährt.',

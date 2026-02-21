@@ -19,7 +19,7 @@
       <nav>
         <ul class="nav-links">
           <li><a href="index.html">Dashboard</a></li>
-          <li><a href="saison.html">Saison-Tipps</a></li>
+          <li><a href="saison.html">Tipps</a></li>
           <li><a href="regeln.html" class="active">Regeln</a></li>
         </ul>
       </nav>
@@ -35,7 +35,7 @@
 
     <!-- Hauptrennen -->
     <section class="rules-section">
-      <h2 class="section-title">Hauptrennen (max. 26 Punkte)</h2>
+      <h2 class="section-title">Hauptrennen (max. 21 Punkte)</h2>
       <div class="card">
         <table class="rules-table">
           <thead>
@@ -46,23 +46,25 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>Rennsieger</td><td>Exakt richtig getippt</td><td>5</td></tr>
-            <tr><td>Podium P1</td><td>Richtiger Fahrer auf P1</td><td>3</td></tr>
+            <tr><td>Rennsieger (= P1)</td><td>Richtiger Rennsieger</td><td>3</td></tr>
             <tr><td>Podium P2</td><td>Richtiger Fahrer auf P2</td><td>2</td></tr>
             <tr><td>Podium P3</td><td>Richtiger Fahrer auf P3</td><td>2</td></tr>
-            <tr><td>Podium-Bonus</td><td>Fahrer auf Podium, aber falsche Position</td><td>1 je</td></tr>
+            <tr><td>Podium-Bonus</td><td>Fahrer auf Podium, aber falsche Position (P2/P3)</td><td>1 je</td></tr>
             <tr><td>Pole Position</td><td>Exakt richtig getippt</td><td>3</td></tr>
             <tr><td>Schnellste Runde</td><td>Exakt richtig getippt</td><td>3</td></tr>
             <tr><td>Bester Konstrukteur</td><td>Exakt richtig getippt</td><td>3</td></tr>
             <tr><td style="color: var(--gold);">Perfekte Runde</td><td>ALLE Kategorien korrekt</td><td>5 Bonus</td></tr>
           </tbody>
         </table>
+        <p class="text-secondary" style="margin-top: var(--space-md); font-size: 0.85rem;">
+          Der Rennsieger ist automatisch Podium P1 &ndash; daher wird nur ein Tipp pro Position abgegeben.
+        </p>
       </div>
     </section>
 
     <!-- Sprint -->
     <section class="rules-section">
-      <h2 class="section-title">Sprint-Rennen (max. 8 Punkte, 6 Runden)</h2>
+      <h2 class="section-title">Sprint-Rennen (max. 7 Punkte, 6 Runden)</h2>
       <div class="card">
         <table class="rules-table">
           <thead>
@@ -73,7 +75,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>Sprint-Sieger</td><td>Exakt richtig getippt</td><td>3</td></tr>
+            <tr><td>Sprint-Sieger (= P1)</td><td>Richtiger Sprint-Sieger</td><td>3</td></tr>
             <tr><td>Sprint P2</td><td>Richtiger Fahrer auf P2</td><td>1</td></tr>
             <tr><td>Sprint P3</td><td>Richtiger Fahrer auf P3</td><td>1</td></tr>
             <tr><td>Sprint Podium-Bonus</td><td>Fahrer auf Podium, falsche Position</td><td>1 je</td></tr>
@@ -112,10 +114,10 @@
       <div class="card">
         <table class="rules-table">
           <tbody>
-            <tr><td>Hauptrennen</td><td>26 × 24 Rennen</td><td>624</td></tr>
-            <tr><td>Sprint</td><td>8 × 6 Runden</td><td>48</td></tr>
+            <tr><td>Hauptrennen</td><td>21 × 24 Rennen</td><td>504</td></tr>
+            <tr><td>Sprint</td><td>7 × 6 Runden</td><td>42</td></tr>
             <tr><td>Saison-Tipps</td><td>WDC + WCC</td><td>35</td></tr>
-            <tr style="font-size: 1.1rem;"><td><strong>Gesamt</strong></td><td></td><td><strong>707</strong></td></tr>
+            <tr style="font-size: 1.1rem;"><td><strong>Gesamt</strong></td><td></td><td><strong>581</strong></td></tr>
           </tbody>
         </table>
       </div>
@@ -152,28 +154,12 @@
       <h2 class="section-title">So gibst du deinen Tipp ab</h2>
       <div class="card">
         <ol style="line-height: 2; padding-left: var(--space-lg);">
-          <li>Öffne die Datei <code>data/predictions.json</code> im Git-Repo</li>
-          <li>Trage deine Tipps für die aktuelle Runde ein</li>
-          <li>Verwende die Fahrer- und Team-IDs aus <code>data/season.json</code></li>
-          <li>Committe und pushe deine Änderungen vor der Deadline</li>
-          <li>Die Git-History dient als unveränderlicher Audit-Trail</li>
+          <li>Wähle deinen Namen oben rechts im Header</li>
+          <li>Gehe zum <strong>Dashboard</strong> und klicke auf das nächste Rennen</li>
+          <li>Fülle das Tipp-Formular aus (Rennsieger, Podium, Pole, etc.)</li>
+          <li>Klicke auf <strong>Tipp abgeben</strong> &ndash; fertig!</li>
+          <li>Saison-Tipps (WDC & WCC) gibst du unter <strong>Tipps</strong> ab</li>
         </ol>
-
-        <h4 style="margin-top: var(--space-lg); margin-bottom: var(--space-sm);">Beispiel für einen Renntipp:</h4>
-        <pre style="background: var(--bg-input); padding: var(--space-md); border-radius: var(--radius-md); overflow-x: auto; font-size: 0.8rem; line-height: 1.5;"><code>{
-  "predictions": {
-    "1": {
-      "thomas": {
-        "winner": "verstappen",
-        "podium": ["verstappen", "norris", "leclerc"],
-        "pole": "verstappen",
-        "fastestLap": "norris",
-        "bestConstructor": "mclaren",
-        "submittedAt": "2026-03-07T10:00:00Z"
-      }
-    }
-  }
-}</code></pre>
       </div>
     </section>
 
