@@ -1300,13 +1300,15 @@ h4 { font-size: 1rem; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: var(--space-md);
-  animation: fadeIn 0.15s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 .modal-content {
@@ -1317,6 +1319,12 @@ h4 { font-size: 1rem; }
   width: 100%;
   max-width: 400px;
   position: relative;
+  animation: modalSlideIn 0.25s ease;
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .modal-close {
@@ -1368,33 +1376,61 @@ h4 { font-size: 1rem; }
 .nav-auth {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
 }
 
-.auth-user-badge {
-  background: var(--bg-card);
+.auth-player-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1.5px solid color-mix(in srgb, var(--player-accent) 40%, transparent);
+  border-radius: var(--radius-full, 999px);
+  padding: 4px 12px 4px 10px;
   color: var(--text-primary);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
-.auth-login-link,
-.auth-logout-link {
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: var(--space-xs) var(--space-sm);
+.auth-player-btn:hover {
+  border-color: var(--player-accent);
+  background: color-mix(in srgb, var(--player-accent) 12%, transparent);
 }
 
-.auth-logout-link {
-  color: var(--text-muted) !important;
-  font-size: 0.75rem;
+.auth-player-name {
+  line-height: 1;
 }
 
-.auth-logout-link:hover {
-  color: var(--color-error) !important;
+.auth-switch-icon {
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+}
+
+.auth-player-btn:hover .auth-switch-icon {
+  opacity: 1;
+}
+
+.auth-pick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--f1-red);
+  border: none;
+  border-radius: var(--radius-full, 999px);
+  padding: 5px 14px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.auth-pick-btn:hover {
+  background: var(--f1-red-dark, #c00500);
+  transform: translateY(-1px);
 }
 
 /* ========================================
@@ -1434,48 +1470,88 @@ h4 { font-size: 1rem; }
    Player Picker Modal
    ======================================== */
 
-.player-picker-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-md);
+.picker-modal {
+  max-width: 400px;
+  text-align: center;
+}
+
+.picker-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.2rem;
   margin-bottom: var(--space-lg);
 }
 
+.player-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
 .player-picker-btn {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-lg) var(--space-md);
+  gap: 6px;
+  padding: var(--space-md) var(--space-sm);
   background: var(--bg-input);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
   color: var(--text-primary);
 }
 
 .player-picker-btn:hover {
   border-color: var(--player-color, var(--f1-red));
-  background: var(--bg-card-hover);
+  background: color-mix(in srgb, var(--player-color, var(--f1-red)) 10%, var(--bg-input));
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.player-picker-btn.is-active {
+  border-color: var(--player-color, var(--f1-red));
+  background: color-mix(in srgb, var(--player-color, var(--f1-red)) 15%, var(--bg-input));
+  box-shadow: 0 0 0 1px var(--player-color, var(--f1-red));
 }
 
 .player-picker-emoji {
-  font-size: 2rem;
+  font-size: 1.8rem;
+  line-height: 1;
 }
 
 .player-picker-name {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
-.player-picker-custom {
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--border-color);
+.player-picker-check {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.7rem;
+  color: var(--player-color, var(--f1-red));
+  font-weight: 700;
+}
+
+.player-picker-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-sm) 0 var(--space-md);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.player-picker-divider::before,
+.player-picker-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
 }
 
 .player-picker-custom-row {
@@ -1485,6 +1561,13 @@ h4 { font-size: 1rem; }
 
 .player-picker-custom-row .form-input {
   flex: 1;
+  text-align: left;
+}
+
+.player-picker-custom-row .btn {
+  min-width: 44px;
+  padding: 0 var(--space-sm);
+  font-size: 1.1rem;
 }
 
 @media (max-width: 400px) {

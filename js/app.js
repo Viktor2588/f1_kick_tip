@@ -31,20 +31,19 @@ function renderAuthUI() {
     const playerId = getCurrentPlayer();
     const known = KNOWN_PLAYERS.find(p => p.id === playerId);
     const displayName = known ? `${known.emoji} ${known.name}` : playerId;
+    const playerColor = known ? known.color : 'var(--text-muted)';
     li.innerHTML = `
-      <span class="auth-user-badge">${displayName}</span>
-      <a href="#" class="auth-logout-link">Wechseln</a>
+      <button class="auth-player-btn" style="--player-accent: ${playerColor}">
+        <span class="auth-player-name">${displayName}</span>
+        <svg class="auth-switch-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/>
+        </svg>
+      </button>
     `;
-    li.querySelector('.auth-logout-link').addEventListener('click', (e) => {
-      e.preventDefault();
-      showPlayerPicker();
-    });
+    li.querySelector('.auth-player-btn').addEventListener('click', showPlayerPicker);
   } else {
-    li.innerHTML = `<a href="#" class="auth-login-link">Name wählen</a>`;
-    li.querySelector('.auth-login-link').addEventListener('click', (e) => {
-      e.preventDefault();
-      showPlayerPicker();
-    });
+    li.innerHTML = `<button class="auth-pick-btn">Spieler w\u00E4hlen</button>`;
+    li.querySelector('.auth-pick-btn').addEventListener('click', showPlayerPicker);
   }
 
   nav.appendChild(li);
@@ -58,27 +57,30 @@ function showPlayerPicker() {
   const existing = document.getElementById('player-picker-modal');
   if (existing) existing.remove();
 
+  const currentId = getCurrentPlayer();
+
   const modal = document.createElement('div');
   modal.id = 'player-picker-modal';
   modal.className = 'modal-overlay';
   modal.innerHTML = `
-    <div class="modal-content" style="max-width: 440px;">
-      <button class="modal-close" aria-label="Schließen">&times;</button>
-      <h2 class="modal-title">Wer bist du?</h2>
+    <div class="modal-content picker-modal">
+      <button class="modal-close" aria-label="Schlie\u00DFen">&times;</button>
+      <h2 class="picker-title">Wer bist du?</h2>
       <div class="player-picker-grid">
         ${KNOWN_PLAYERS.map(p => `
-          <button class="player-picker-btn" data-player-id="${p.id}" style="--player-color: ${p.color}">
+          <button class="player-picker-btn${p.id === currentId ? ' is-active' : ''}" data-player-id="${p.id}" style="--player-color: ${p.color}">
             <span class="player-picker-emoji">${p.emoji}</span>
             <span class="player-picker-name">${p.name}</span>
+            ${p.id === currentId ? '<span class="player-picker-check">\u2713</span>' : ''}
           </button>
         `).join('')}
       </div>
-      <div class="player-picker-custom">
-        <label class="form-label" style="margin-bottom: var(--space-xs);">Anderer Name</label>
-        <div class="player-picker-custom-row">
-          <input type="text" id="custom-player-name" class="form-input" placeholder="Name eingeben..." maxlength="20">
-          <button class="btn btn-primary" id="custom-player-btn">OK</button>
-        </div>
+      <div class="player-picker-divider">
+        <span>oder</span>
+      </div>
+      <div class="player-picker-custom-row">
+        <input type="text" id="custom-player-name" class="form-input" placeholder="Anderen Namen eingeben..." maxlength="20">
+        <button class="btn btn-primary" id="custom-player-btn">\u2192</button>
       </div>
     </div>
   `;
@@ -118,8 +120,6 @@ function showPlayerPicker() {
   customInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') submitCustomPlayer();
   });
-
-  customInput.focus();
 }
 
 // Make showPlayerPicker available globally for tip forms
