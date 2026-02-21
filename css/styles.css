@@ -1279,7 +1279,7 @@ h4 { font-size: 1rem; }
 
 /* --- Tip Form Card --- */
 .tip-form-card {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .tip-form-header {
