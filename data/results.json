@@ -1,0 +1,13 @@
+{
+  "results": {
+    "1": {
+      "winner": "verstappen",
+      "podium": ["verstappen", "norris", "hamilton"],
+      "pole": "verstappen",
+      "fastestLap": "norris",
+      "bestConstructor": "mclaren",
+      "topTen": ["verstappen", "norris", "hamilton", "leclerc", "piastri", "russell", "alonso", "sainz", "gasly", "hulkenberg"],
+      "enteredAt": "2026-03-08T07:30:00Z"
+    }
+  }
+}

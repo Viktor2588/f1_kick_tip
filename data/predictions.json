@@ -1,0 +1,30 @@
+{
+  "predictions": {
+    "1": {
+      "thomas": {
+        "winner": "verstappen",
+        "podium": ["verstappen", "norris", "leclerc"],
+        "pole": "verstappen",
+        "fastestLap": "norris",
+        "bestConstructor": "mclaren",
+        "submittedAt": "2026-03-07T10:00:00Z"
+      },
+      "julia": {
+        "winner": "norris",
+        "podium": ["norris", "verstappen", "hamilton"],
+        "pole": "verstappen",
+        "fastestLap": "piastri",
+        "bestConstructor": "mclaren",
+        "submittedAt": "2026-03-07T14:00:00Z"
+      },
+      "viktor": {
+        "winner": "verstappen",
+        "podium": ["verstappen", "hamilton", "norris"],
+        "pole": "norris",
+        "fastestLap": "verstappen",
+        "bestConstructor": "redbull",
+        "submittedAt": "2026-03-07T18:00:00Z"
+      }
+    }
+  }
+}

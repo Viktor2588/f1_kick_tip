@@ -1,0 +1,191 @@
+{
+  "season": 2026,
+  "players": [
+    { "id": "thomas", "name": "Thomas", "emoji": "\ud83c\udde9\ud83c\uddea", "color": "#FF6B35" },
+    { "id": "julia", "name": "Julia", "emoji": "\ud83c\udf1f", "color": "#7B2FBE" },
+    { "id": "viktor", "name": "Viktor", "emoji": "\u26a1", "color": "#00B4D8" }
+  ],
+  "teams": [
+    { "id": "mclaren", "name": "McLaren", "color": "#FF8000", "drivers": ["norris", "piastri"] },
+    { "id": "ferrari", "name": "Ferrari", "color": "#E8002D", "drivers": ["leclerc", "hamilton"] },
+    { "id": "redbull", "name": "Red Bull", "color": "#3671C6", "drivers": ["verstappen", "hadjar"] },
+    { "id": "mercedes", "name": "Mercedes", "color": "#27F4D2", "drivers": ["russell", "antonelli"] },
+    { "id": "astonmartin", "name": "Aston Martin", "color": "#229971", "drivers": ["alonso", "stroll"] },
+    { "id": "williams", "name": "Williams", "color": "#64C4FF", "drivers": ["albon", "sainz"] },
+    { "id": "racingbulls", "name": "Racing Bulls", "color": "#6692FF", "drivers": ["lawson", "lindblad"] },
+    { "id": "haas", "name": "Haas", "color": "#B6BABD", "drivers": ["ocon", "bearman"] },
+    { "id": "audi", "name": "Audi", "color": "#00E701", "drivers": ["hulkenberg", "bortoleto"] },
+    { "id": "alpine", "name": "Alpine", "color": "#0093CC", "drivers": ["gasly", "colapinto"] },
+    { "id": "cadillac", "name": "Cadillac", "color": "#C0C0C0", "drivers": ["bottas", "perez"] }
+  ],
+  "drivers": [
+    { "id": "norris", "name": "Lando Norris", "number": 4, "team": "mclaren" },
+    { "id": "piastri", "name": "Oscar Piastri", "number": 81, "team": "mclaren" },
+    { "id": "leclerc", "name": "Charles Leclerc", "number": 16, "team": "ferrari" },
+    { "id": "hamilton", "name": "Lewis Hamilton", "number": 44, "team": "ferrari" },
+    { "id": "verstappen", "name": "Max Verstappen", "number": 1, "team": "redbull" },
+    { "id": "hadjar", "name": "Isack Hadjar", "number": 6, "team": "redbull" },
+    { "id": "russell", "name": "George Russell", "number": 63, "team": "mercedes" },
+    { "id": "antonelli", "name": "Kimi Antonelli", "number": 12, "team": "mercedes" },
+    { "id": "alonso", "name": "Fernando Alonso", "number": 14, "team": "astonmartin" },
+    { "id": "stroll", "name": "Lance Stroll", "number": 18, "team": "astonmartin" },
+    { "id": "albon", "name": "Alex Albon", "number": 23, "team": "williams" },
+    { "id": "sainz", "name": "Carlos Sainz", "number": 55, "team": "williams" },
+    { "id": "lawson", "name": "Liam Lawson", "number": 30, "team": "racingbulls" },
+    { "id": "lindblad", "name": "Arvid Lindblad", "number": 45, "team": "racingbulls" },
+    { "id": "ocon", "name": "Esteban Ocon", "number": 31, "team": "haas" },
+    { "id": "bearman", "name": "Oliver Bearman", "number": 87, "team": "haas" },
+    { "id": "hulkenberg", "name": "Nico H\u00fclkenberg", "number": 27, "team": "audi" },
+    { "id": "bortoleto", "name": "Gabriel Bortoleto", "number": 5, "team": "audi" },
+    { "id": "gasly", "name": "Pierre Gasly", "number": 10, "team": "alpine" },
+    { "id": "colapinto", "name": "Franco Colapinto", "number": 43, "team": "alpine" },
+    { "id": "bottas", "name": "Valtteri Bottas", "number": 77, "team": "cadillac" },
+    { "id": "perez", "name": "Sergio Perez", "number": 11, "team": "cadillac" }
+  ],
+  "races": [
+    {
+      "round": 1, "name": "Großer Preis von Australien", "country": "Australien",
+      "countryCode": "AU", "circuit": "Albert Park Circuit", "city": "Melbourne",
+      "date": "2026-03-08", "raceStartUTC": "2026-03-08T05:00:00Z",
+      "qualiStartUTC": "2026-03-07T06:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 2, "name": "Großer Preis von China", "country": "China",
+      "countryCode": "CN", "circuit": "Shanghai International Circuit", "city": "Shanghai",
+      "date": "2026-03-15", "raceStartUTC": "2026-03-15T07:00:00Z",
+      "qualiStartUTC": "2026-03-14T07:00:00Z", "sprintStartUTC": "2026-03-14T03:00:00Z", "sprint": true
+    },
+    {
+      "round": 3, "name": "Großer Preis von Japan", "country": "Japan",
+      "countryCode": "JP", "circuit": "Suzuka International Racing Course", "city": "Suzuka",
+      "date": "2026-03-29", "raceStartUTC": "2026-03-29T06:00:00Z",
+      "qualiStartUTC": "2026-03-28T06:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 4, "name": "Großer Preis von Bahrain", "country": "Bahrain",
+      "countryCode": "BH", "circuit": "Bahrain International Circuit", "city": "Sakhir",
+      "date": "2026-04-12", "raceStartUTC": "2026-04-12T15:00:00Z",
+      "qualiStartUTC": "2026-04-11T15:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 5, "name": "Großer Preis von Saudi-Arabien", "country": "Saudi-Arabien",
+      "countryCode": "SA", "circuit": "Jeddah Corniche Circuit", "city": "Jeddah",
+      "date": "2026-04-19", "raceStartUTC": "2026-04-19T17:00:00Z",
+      "qualiStartUTC": "2026-04-18T17:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 6, "name": "Großer Preis von Miami", "country": "USA",
+      "countryCode": "US", "circuit": "Miami International Autodrome", "city": "Miami",
+      "date": "2026-05-03", "raceStartUTC": "2026-05-03T20:00:00Z",
+      "qualiStartUTC": "2026-05-02T20:00:00Z", "sprintStartUTC": "2026-05-02T16:30:00Z", "sprint": true
+    },
+    {
+      "round": 7, "name": "Großer Preis von Kanada", "country": "Kanada",
+      "countryCode": "CA", "circuit": "Circuit Gilles Villeneuve", "city": "Montreal",
+      "date": "2026-05-24", "raceStartUTC": "2026-05-24T18:00:00Z",
+      "qualiStartUTC": "2026-05-23T18:00:00Z", "sprintStartUTC": "2026-05-23T14:30:00Z", "sprint": true
+    },
+    {
+      "round": 8, "name": "Großer Preis von Monaco", "country": "Monaco",
+      "countryCode": "MC", "circuit": "Circuit de Monaco", "city": "Monaco",
+      "date": "2026-06-07", "raceStartUTC": "2026-06-07T13:00:00Z",
+      "qualiStartUTC": "2026-06-06T14:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 9, "name": "Großer Preis von Spanien", "country": "Spanien",
+      "countryCode": "ES", "circuit": "Circuit de Barcelona-Catalunya", "city": "Barcelona",
+      "date": "2026-06-14", "raceStartUTC": "2026-06-14T13:00:00Z",
+      "qualiStartUTC": "2026-06-13T14:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 10, "name": "Großer Preis von Österreich", "country": "\u00d6sterreich",
+      "countryCode": "AT", "circuit": "Red Bull Ring", "city": "Spielberg",
+      "date": "2026-06-28", "raceStartUTC": "2026-06-28T13:00:00Z",
+      "qualiStartUTC": "2026-06-27T14:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 11, "name": "Großer Preis von Großbritannien", "country": "Großbritannien",
+      "countryCode": "GB", "circuit": "Silverstone Circuit", "city": "Silverstone",
+      "date": "2026-07-05", "raceStartUTC": "2026-07-05T14:00:00Z",
+      "qualiStartUTC": "2026-07-04T14:00:00Z", "sprintStartUTC": "2026-07-04T10:30:00Z", "sprint": true
+    },
+    {
+      "round": 12, "name": "Großer Preis von Belgien", "country": "Belgien",
+      "countryCode": "BE", "circuit": "Circuit de Spa-Francorchamps", "city": "Spa",
+      "date": "2026-07-19", "raceStartUTC": "2026-07-19T13:00:00Z",
+      "qualiStartUTC": "2026-07-18T14:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 13, "name": "Großer Preis von Ungarn", "country": "Ungarn",
+      "countryCode": "HU", "circuit": "Hungaroring", "city": "Budapest",
+      "date": "2026-07-26", "raceStartUTC": "2026-07-26T13:00:00Z",
+      "qualiStartUTC": "2026-07-25T14:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 14, "name": "Großer Preis der Niederlande", "country": "Niederlande",
+      "countryCode": "NL", "circuit": "Circuit Zandvoort", "city": "Zandvoort",
+      "date": "2026-08-23", "raceStartUTC": "2026-08-23T13:00:00Z",
+      "qualiStartUTC": "2026-08-22T14:00:00Z", "sprintStartUTC": "2026-08-22T10:30:00Z", "sprint": true
+    },
+    {
+      "round": 15, "name": "Großer Preis von Italien", "country": "Italien",
+      "countryCode": "IT", "circuit": "Autodromo Nazionale Monza", "city": "Monza",
+      "date": "2026-09-06", "raceStartUTC": "2026-09-06T13:00:00Z",
+      "qualiStartUTC": "2026-09-05T14:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 16, "name": "Großer Preis von Madrid", "country": "Spanien",
+      "countryCode": "ES", "circuit": "Madrid Street Circuit", "city": "Madrid",
+      "date": "2026-09-13", "raceStartUTC": "2026-09-13T13:00:00Z",
+      "qualiStartUTC": "2026-09-12T14:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 17, "name": "Großer Preis von Aserbaidschan", "country": "Aserbaidschan",
+      "countryCode": "AZ", "circuit": "Baku City Circuit", "city": "Baku",
+      "date": "2026-09-26", "raceStartUTC": "2026-09-26T11:00:00Z",
+      "qualiStartUTC": "2026-09-25T12:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 18, "name": "Großer Preis von Singapur", "country": "Singapur",
+      "countryCode": "SG", "circuit": "Marina Bay Street Circuit", "city": "Singapur",
+      "date": "2026-10-11", "raceStartUTC": "2026-10-11T12:00:00Z",
+      "qualiStartUTC": "2026-10-10T13:00:00Z", "sprintStartUTC": "2026-10-10T09:30:00Z", "sprint": true
+    },
+    {
+      "round": 19, "name": "Großer Preis der USA", "country": "USA",
+      "countryCode": "US", "circuit": "Circuit of the Americas", "city": "Austin",
+      "date": "2026-10-25", "raceStartUTC": "2026-10-25T19:00:00Z",
+      "qualiStartUTC": "2026-10-24T20:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 20, "name": "Großer Preis von Mexiko", "country": "Mexiko",
+      "countryCode": "MX", "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez", "city": "Mexiko-Stadt",
+      "date": "2026-11-01", "raceStartUTC": "2026-11-01T20:00:00Z",
+      "qualiStartUTC": "2026-10-31T21:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 21, "name": "Großer Preis von Brasilien", "country": "Brasilien",
+      "countryCode": "BR", "circuit": "Aut\u00f3dromo Jos\u00e9 Carlos Pace", "city": "S\u00e3o Paulo",
+      "date": "2026-11-08", "raceStartUTC": "2026-11-08T17:00:00Z",
+      "qualiStartUTC": "2026-11-07T18:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 22, "name": "Großer Preis von Las Vegas", "country": "USA",
+      "countryCode": "US", "circuit": "Las Vegas Strip Circuit", "city": "Las Vegas",
+      "date": "2026-11-21", "raceStartUTC": "2026-11-22T06:00:00Z",
+      "qualiStartUTC": "2026-11-21T06:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 23, "name": "Großer Preis von Katar", "country": "Katar",
+      "countryCode": "QA", "circuit": "Lusail International Circuit", "city": "Lusail",
+      "date": "2026-11-29", "raceStartUTC": "2026-11-29T14:00:00Z",
+      "qualiStartUTC": "2026-11-28T15:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 24, "name": "Großer Preis von Abu Dhabi", "country": "Abu Dhabi",
+      "countryCode": "AE", "circuit": "Yas Marina Circuit", "city": "Abu Dhabi",
+      "date": "2026-12-06", "raceStartUTC": "2026-12-06T13:00:00Z",
+      "qualiStartUTC": "2026-12-05T14:00:00Z", "sprintStartUTC": null, "sprint": false
+    }
+  ]
+}
