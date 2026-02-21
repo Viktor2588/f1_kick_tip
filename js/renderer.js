@@ -16,7 +16,7 @@ import {
 } from './scoring.js';
 
 import {
-  isLoggedIn, getPlayerIdFromSession, getSessionUser,
+  isLoggedIn, getPlayerIdFromSession,
   submitRacePrediction, submitSprintPrediction, submitSeasonPrediction,
 } from './api.js';
 
@@ -725,8 +725,8 @@ function renderTipForm(season, race, predictions, results, data) {
     container.innerHTML = `
       <div class="card tip-login-prompt">
         <div class="text-center">
-          <p>Melde dich an, um deinen Tipp abzugeben</p>
-          <button class="btn btn-primary" onclick="window.__showLoginModal()">Anmelden</button>
+          <p>Wähle deinen Namen, um deinen Tipp abzugeben</p>
+          <button class="btn btn-primary" onclick="window.__showLoginModal()">Name wählen</button>
         </div>
       </div>
     `;
@@ -849,8 +849,8 @@ function renderSprintTipForm(season, race, sprintPredictions, sprintResults, dat
     container.innerHTML = `
       <div class="card tip-login-prompt">
         <div class="text-center">
-          <p>Melde dich an, um deinen Sprint-Tipp abzugeben</p>
-          <button class="btn btn-primary" onclick="window.__showLoginModal()">Anmelden</button>
+          <p>Wähle deinen Namen, um deinen Sprint-Tipp abzugeben</p>
+          <button class="btn btn-primary" onclick="window.__showLoginModal()">Name wählen</button>
         </div>
       </div>
     `;
@@ -1025,8 +1025,8 @@ function renderSeasonTipForm(season, seasonPredictions) {
       <div class="section">
         <div class="card tip-login-prompt">
           <div class="text-center">
-            <p>Melde dich an, um deinen Saison-Tipp abzugeben</p>
-            <button class="btn btn-primary" onclick="window.__showLoginModal()">Anmelden</button>
+            <p>Wähle deinen Namen, um deinen Saison-Tipp abzugeben</p>
+            <button class="btn btn-primary" onclick="window.__showLoginModal()">Name wählen</button>
           </div>
         </div>
       </div>

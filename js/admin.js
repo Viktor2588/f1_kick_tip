@@ -4,7 +4,6 @@
 
 import { loadAllData, countryFlag, formatDate, driverName, teamName } from './utils.js';
 import {
-  initAuth, isLoggedIn, getSessionUser, signOut,
   submitRaceResult, submitSprintResult,
   submitRacePrediction, submitSprintPrediction, submitSeasonPrediction,
   deleteRaceResult, deleteSprintResult,
@@ -22,25 +21,6 @@ const state = {
 
 // ── Init ───────────────────────────────────────────────
 async function init() {
-  // Initialize auth
-  await initAuth();
-
-  if (!isLoggedIn()) {
-    document.querySelector('main').innerHTML = `
-      <div class="empty-state" style="padding-top: var(--space-2xl);">
-        <div class="empty-state-icon">\ud83d\udd12</div>
-        <div class="empty-state-text">Bitte anmelden um den Admin-Bereich zu nutzen.</div>
-        <button class="btn btn-primary" style="margin-top: var(--space-md);" id="admin-login-btn">Anmelden</button>
-      </div>`;
-    document.getElementById('admin-login-btn').addEventListener('click', () => {
-      if (window.__showLoginModal) window.__showLoginModal();
-    });
-    renderAuthNav();
-    return;
-  }
-
-  renderAuthNav();
-
   try {
     const data = await loadAllData();
     state.season = structuredClone(data.season);
@@ -69,103 +49,6 @@ async function init() {
       </div>`;
   }
 }
-
-/**
- * Render login/logout in the admin header nav.
- */
-function renderAuthNav() {
-  const nav = document.querySelector('.nav-links');
-  if (!nav) return;
-
-  const existing = nav.querySelector('.nav-auth');
-  if (existing) existing.remove();
-
-  const li = document.createElement('li');
-  li.className = 'nav-auth';
-
-  if (isLoggedIn()) {
-    const user = getSessionUser();
-    const displayName = user?.name || 'Admin';
-    li.innerHTML = `
-      <span class="auth-user-badge">${displayName}</span>
-      <a href="#" class="auth-logout-link">Abmelden</a>
-    `;
-    li.querySelector('.auth-logout-link').addEventListener('click', async (e) => {
-      e.preventDefault();
-      await signOut();
-      window.location.reload();
-    });
-  } else {
-    li.innerHTML = `<a href="#" class="auth-login-link">Anmelden</a>`;
-    li.querySelector('.auth-login-link').addEventListener('click', (e) => {
-      e.preventDefault();
-      if (window.__showLoginModal) window.__showLoginModal();
-    });
-  }
-
-  nav.appendChild(li);
-}
-
-/**
- * Show login modal (simplified version for admin page).
- */
-function showLoginModal() {
-  const existing = document.getElementById('login-modal');
-  if (existing) existing.remove();
-
-  const modal = document.createElement('div');
-  modal.id = 'login-modal';
-  modal.className = 'modal-overlay';
-  modal.innerHTML = `
-    <div class="modal-content">
-      <button class="modal-close" aria-label="Schlie\u00dfen">&times;</button>
-      <h2 class="modal-title">Anmelden</h2>
-      <form id="login-form" class="login-form">
-        <div class="form-group">
-          <label class="form-label" for="login-email">E-Mail</label>
-          <input type="email" id="login-email" class="form-input" required autocomplete="email" placeholder="name@example.de">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="login-password">Passwort</label>
-          <input type="password" id="login-password" class="form-input" required autocomplete="current-password" placeholder="Passwort">
-        </div>
-        <div id="login-error" class="login-error" hidden></div>
-        <button type="submit" class="btn btn-primary login-submit-btn">Anmelden</button>
-      </form>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-  modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-  modal.querySelector('#login-email').focus();
-
-  modal.querySelector('#login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = modal.querySelector('#login-email').value.trim();
-    const password = modal.querySelector('#login-password').value;
-    const errorEl = modal.querySelector('#login-error');
-    const submitBtn = modal.querySelector('.login-submit-btn');
-
-    errorEl.hidden = true;
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Anmelden...';
-
-    try {
-      const { signIn } = await import('./api.js');
-      await signIn(email, password);
-      modal.remove();
-      window.location.reload();
-    } catch (err) {
-      errorEl.textContent = err.message || 'Anmeldung fehlgeschlagen';
-      errorEl.hidden = false;
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Anmelden';
-    }
-  });
-}
-
-window.__showLoginModal = showLoginModal;
 
 // ── Tabs ───────────────────────────────────────────────
 function initTabs() {

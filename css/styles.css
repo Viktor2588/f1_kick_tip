@@ -1267,3 +1267,66 @@ h4 { font-size: 1rem; }
   font-weight: 700;
   font-size: 1.1rem;
 }
+
+/* ========================================
+   Player Picker Modal
+   ======================================== */
+
+.player-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.player-picker-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-md);
+  background: var(--bg-input);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text-primary);
+}
+
+.player-picker-btn:hover {
+  border-color: var(--player-color, var(--f1-red));
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.player-picker-emoji {
+  font-size: 2rem;
+}
+
+.player-picker-name {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.player-picker-custom {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.player-picker-custom-row {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.player-picker-custom-row .form-input {
+  flex: 1;
+}
+
+@media (max-width: 400px) {
+  .player-picker-grid {
+    grid-template-columns: 1fr;
+  }
+}
