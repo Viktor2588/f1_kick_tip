@@ -3,6 +3,12 @@
 // ========================================
 
 import { loadAllData, countryFlag, formatDate, driverName, teamName } from './utils.js';
+import {
+  initAuth, isLoggedIn, getSessionUser, signOut,
+  submitRaceResult, submitSprintResult,
+  submitRacePrediction, submitSprintPrediction, submitSeasonPrediction,
+  deleteRaceResult, deleteSprintResult,
+} from './api.js';
 
 // ── State ──────────────────────────────────────────────
 const state = {
@@ -12,11 +18,29 @@ const state = {
   sprintPredictions: null,
   sprintResults: null,
   seasonPredictions: null,
-  dirty: new Set(),
 };
 
 // ── Init ───────────────────────────────────────────────
 async function init() {
+  // Initialize auth
+  await initAuth();
+
+  if (!isLoggedIn()) {
+    document.querySelector('main').innerHTML = `
+      <div class="empty-state" style="padding-top: var(--space-2xl);">
+        <div class="empty-state-icon">\ud83d\udd12</div>
+        <div class="empty-state-text">Bitte anmelden um den Admin-Bereich zu nutzen.</div>
+        <button class="btn btn-primary" style="margin-top: var(--space-md);" id="admin-login-btn">Anmelden</button>
+      </div>`;
+    document.getElementById('admin-login-btn').addEventListener('click', () => {
+      if (window.__showLoginModal) window.__showLoginModal();
+    });
+    renderAuthNav();
+    return;
+  }
+
+  renderAuthNav();
+
   try {
     const data = await loadAllData();
     state.season = structuredClone(data.season);
@@ -36,16 +60,112 @@ async function init() {
     initTabs();
     initExportButtons();
     renderActiveTab();
-    initBeforeUnload();
   } catch (err) {
     console.error('Admin init error:', err);
     document.querySelector('main').innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">⚠️</div>
+        <div class="empty-state-icon">\u26a0\ufe0f</div>
         <div class="empty-state-text">Fehler beim Laden der Daten: ${err.message}</div>
       </div>`;
   }
 }
+
+/**
+ * Render login/logout in the admin header nav.
+ */
+function renderAuthNav() {
+  const nav = document.querySelector('.nav-links');
+  if (!nav) return;
+
+  const existing = nav.querySelector('.nav-auth');
+  if (existing) existing.remove();
+
+  const li = document.createElement('li');
+  li.className = 'nav-auth';
+
+  if (isLoggedIn()) {
+    const user = getSessionUser();
+    const displayName = user?.name || 'Admin';
+    li.innerHTML = `
+      <span class="auth-user-badge">${displayName}</span>
+      <a href="#" class="auth-logout-link">Abmelden</a>
+    `;
+    li.querySelector('.auth-logout-link').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut();
+      window.location.reload();
+    });
+  } else {
+    li.innerHTML = `<a href="#" class="auth-login-link">Anmelden</a>`;
+    li.querySelector('.auth-login-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (window.__showLoginModal) window.__showLoginModal();
+    });
+  }
+
+  nav.appendChild(li);
+}
+
+/**
+ * Show login modal (simplified version for admin page).
+ */
+function showLoginModal() {
+  const existing = document.getElementById('login-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'login-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Schlie\u00dfen">&times;</button>
+      <h2 class="modal-title">Anmelden</h2>
+      <form id="login-form" class="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">E-Mail</label>
+          <input type="email" id="login-email" class="form-input" required autocomplete="email" placeholder="name@example.de">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Passwort</label>
+          <input type="password" id="login-password" class="form-input" required autocomplete="current-password" placeholder="Passwort">
+        </div>
+        <div id="login-error" class="login-error" hidden></div>
+        <button type="submit" class="btn btn-primary login-submit-btn">Anmelden</button>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+  modal.querySelector('#login-email').focus();
+
+  modal.querySelector('#login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = modal.querySelector('#login-email').value.trim();
+    const password = modal.querySelector('#login-password').value;
+    const errorEl = modal.querySelector('#login-error');
+    const submitBtn = modal.querySelector('.login-submit-btn');
+
+    errorEl.hidden = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Anmelden...';
+
+    try {
+      const { signIn } = await import('./api.js');
+      await signIn(email, password);
+      modal.remove();
+      window.location.reload();
+    } catch (err) {
+      errorEl.textContent = err.message || 'Anmeldung fehlgeschlagen';
+      errorEl.hidden = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Anmelden';
+    }
+  });
+}
+
+window.__showLoginModal = showLoginModal;
 
 // ── Tabs ───────────────────────────────────────────────
 function initTabs() {
@@ -112,10 +232,6 @@ function toDatetimeLocal(utcStr) {
 function toUTC(localStr) {
   if (!localStr) return new Date().toISOString();
   return new Date(localStr).toISOString();
-}
-
-function markDirty(key) {
-  state.dirty.add(key);
 }
 
 function showToast(message, type = 'success') {
@@ -240,17 +356,21 @@ function renderResultsForm(round) {
     saveResult(round);
   });
 
-  area.querySelector('#clear-result').addEventListener('click', () => {
+  area.querySelector('#clear-result').addEventListener('click', async () => {
     if (confirm(`Ergebnis für Runde ${round} wirklich löschen?`)) {
-      delete state.results.results[roundStr];
-      markDirty('results');
-      showToast(`Ergebnis Runde ${round} gelöscht`, 'info');
-      renderResultsForm(round);
+      try {
+        await deleteRaceResult(round);
+        delete state.results.results[roundStr];
+        showToast(`Ergebnis Runde ${round} gelöscht`, 'info');
+        renderResultsForm(round);
+      } catch (err) {
+        showToast(`Fehler: ${err.message}`, 'error');
+      }
     }
   });
 }
 
-function saveResult(round) {
+async function saveResult(round) {
   const form = document.getElementById('result-form');
   const fd = new FormData(form);
   const roundStr = String(round);
@@ -270,7 +390,7 @@ function saveResult(round) {
     if (v) topTen.push(v);
   }
 
-  state.results.results[roundStr] = {
+  const data = {
     winner,
     podium,
     pole: fd.get('pole') || '',
@@ -280,13 +400,13 @@ function saveResult(round) {
     enteredAt: toUTC(fd.get('enteredAt')),
   };
 
-  // Remove undefined topTen
-  if (!state.results.results[roundStr].topTen) {
-    delete state.results.results[roundStr].topTen;
+  try {
+    await submitRaceResult(round, data);
+    state.results.results[roundStr] = data;
+    showToast(`Ergebnis Runde ${round} gespeichert`);
+  } catch (err) {
+    showToast(`Fehler: ${err.message}`, 'error');
   }
-
-  markDirty('results');
-  showToast(`Ergebnis Runde ${round} gespeichert`);
 }
 
 // ════════════════════════════════════════════════════════
@@ -367,21 +487,23 @@ function renderPredictionsForm(round) {
   });
 }
 
-function savePredictions(round) {
+async function savePredictions(round) {
   const roundStr = String(round);
   if (!state.predictions.predictions[roundStr]) {
     state.predictions.predictions[roundStr] = {};
   }
 
   const forms = document.querySelectorAll('.prediction-form');
+  const promises = [];
+
   for (const form of forms) {
     const playerId = form.dataset.player;
     const fd = new FormData(form);
 
     const winner = fd.get('winner');
-    if (!winner) continue; // Skip empty predictions
+    if (!winner) continue;
 
-    state.predictions.predictions[roundStr][playerId] = {
+    const data = {
       winner,
       podium: [
         fd.get(`${playerId}_podium_0`) || '',
@@ -391,12 +513,24 @@ function savePredictions(round) {
       pole: fd.get('pole') || '',
       fastestLap: fd.get('fastestLap') || '',
       bestConstructor: fd.get('bestConstructor') || '',
-      submittedAt: toUTC(fd.get('submittedAt')),
     };
+
+    promises.push(
+      submitRacePrediction(round, playerId, data).then(() => {
+        state.predictions.predictions[roundStr][playerId] = {
+          ...data,
+          submittedAt: toUTC(fd.get('submittedAt')),
+        };
+      })
+    );
   }
 
-  markDirty('predictions');
-  showToast(`Tipps Runde ${round} gespeichert`);
+  try {
+    await Promise.all(promises);
+    showToast(`Tipps Runde ${round} gespeichert`);
+  } catch (err) {
+    showToast(`Fehler: ${err.message}`, 'error');
+  }
 }
 
 // ════════════════════════════════════════════════════════
@@ -464,17 +598,21 @@ function renderSprintResultsForm(round) {
     saveSprintResult(round);
   });
 
-  area.querySelector('#clear-sprint-result').addEventListener('click', () => {
+  area.querySelector('#clear-sprint-result').addEventListener('click', async () => {
     if (confirm(`Sprint-Ergebnis für Runde ${round} wirklich löschen?`)) {
-      delete state.sprintResults.sprintResults[roundStr];
-      markDirty('sprintResults');
-      showToast(`Sprint-Ergebnis Runde ${round} gelöscht`, 'info');
-      renderSprintResultsForm(round);
+      try {
+        await deleteSprintResult(round);
+        delete state.sprintResults.sprintResults[roundStr];
+        showToast(`Sprint-Ergebnis Runde ${round} gelöscht`, 'info');
+        renderSprintResultsForm(round);
+      } catch (err) {
+        showToast(`Fehler: ${err.message}`, 'error');
+      }
     }
   });
 }
 
-function saveSprintResult(round) {
+async function saveSprintResult(round) {
   const form = document.getElementById('sprint-result-form');
   const fd = new FormData(form);
   const roundStr = String(round);
@@ -482,18 +620,22 @@ function saveSprintResult(round) {
   const winner = fd.get('winner');
   if (!winner) { showToast('Bitte Sieger auswählen', 'error'); return; }
 
-  state.sprintResults.sprintResults[roundStr] = {
+  const data = {
     winner,
     podium: [
       fd.get('sprint_podium_0') || '',
       fd.get('sprint_podium_1') || '',
       fd.get('sprint_podium_2') || '',
     ],
-    enteredAt: toUTC(fd.get('enteredAt')),
   };
 
-  markDirty('sprintResults');
-  showToast(`Sprint-Ergebnis Runde ${round} gespeichert`);
+  try {
+    await submitSprintResult(round, data);
+    state.sprintResults.sprintResults[roundStr] = { ...data, enteredAt: new Date().toISOString() };
+    showToast(`Sprint-Ergebnis Runde ${round} gespeichert`);
+  } catch (err) {
+    showToast(`Fehler: ${err.message}`, 'error');
+  }
 }
 
 // ════════════════════════════════════════════════════════
@@ -568,13 +710,15 @@ function renderSprintPredictionsForm(round) {
   });
 }
 
-function saveSprintPredictions(round) {
+async function saveSprintPredictions(round) {
   const roundStr = String(round);
   if (!state.sprintPredictions.sprintPredictions[roundStr]) {
     state.sprintPredictions.sprintPredictions[roundStr] = {};
   }
 
   const forms = document.querySelectorAll('.sprint-prediction-form');
+  const promises = [];
+
   for (const form of forms) {
     const playerId = form.dataset.player;
     const fd = new FormData(form);
@@ -582,19 +726,31 @@ function saveSprintPredictions(round) {
     const winner = fd.get('winner');
     if (!winner) continue;
 
-    state.sprintPredictions.sprintPredictions[roundStr][playerId] = {
+    const data = {
       winner,
       podium: [
         fd.get(`sp_${playerId}_podium_0`) || '',
         fd.get(`sp_${playerId}_podium_1`) || '',
         fd.get(`sp_${playerId}_podium_2`) || '',
       ],
-      submittedAt: toUTC(fd.get('submittedAt')),
     };
+
+    promises.push(
+      submitSprintPrediction(round, playerId, data).then(() => {
+        state.sprintPredictions.sprintPredictions[roundStr][playerId] = {
+          ...data,
+          submittedAt: toUTC(fd.get('submittedAt')),
+        };
+      })
+    );
   }
 
-  markDirty('sprintPredictions');
-  showToast(`Sprint-Tipps Runde ${round} gespeichert`);
+  try {
+    await Promise.all(promises);
+    showToast(`Sprint-Tipps Runde ${round} gespeichert`);
+  } catch (err) {
+    showToast(`Fehler: ${err.message}`, 'error');
+  }
 }
 
 // ════════════════════════════════════════════════════════
@@ -697,8 +853,10 @@ function renderPlayerList() {
   });
 }
 
-function saveSeasonPredictions() {
+async function saveSeasonPredictions() {
   const forms = document.querySelectorAll('.season-prediction-form');
+  const promises = [];
+
   for (const form of forms) {
     const playerId = form.dataset.player;
     const fd = new FormData(form);
@@ -707,15 +865,24 @@ function saveSeasonPredictions() {
     const wcc = fd.get('wcc');
     if (!wdc && !wcc) continue;
 
-    state.seasonPredictions.seasonPredictions[playerId] = {
-      wdc: wdc || '',
-      wcc: wcc || '',
-      submittedAt: toUTC(fd.get('submittedAt')),
-    };
+    const data = { wdc: wdc || '', wcc: wcc || '' };
+
+    promises.push(
+      submitSeasonPrediction(playerId, data).then(() => {
+        state.seasonPredictions.seasonPredictions[playerId] = {
+          ...data,
+          submittedAt: toUTC(fd.get('submittedAt')),
+        };
+      })
+    );
   }
 
-  markDirty('seasonPredictions');
-  showToast('Saison-Tipps gespeichert');
+  try {
+    await Promise.all(promises);
+    showToast('Saison-Tipps gespeichert');
+  } catch (err) {
+    showToast(`Fehler: ${err.message}`, 'error');
+  }
 }
 
 function addPlayer() {
@@ -737,7 +904,7 @@ function addPlayer() {
   }
 
   state.season.players.push({ id, name, emoji, color });
-  markDirty('season');
+  // Note: season.json is static, player changes are local only
   showToast(`Spieler "${name}" hinzugefügt`);
   form.reset();
   renderSeasonTab();
@@ -751,23 +918,20 @@ function removePlayer(playerId) {
 
   // Remove from players array
   state.season.players = state.season.players.filter(p => p.id !== playerId);
-  markDirty('season');
+  // Note: season.json is static, player changes are local only
 
   // Remove from predictions (all rounds)
   for (const roundStr of Object.keys(state.predictions.predictions)) {
     delete state.predictions.predictions[roundStr][playerId];
   }
-  markDirty('predictions');
 
   // Remove from sprint predictions (all rounds)
   for (const roundStr of Object.keys(state.sprintPredictions.sprintPredictions)) {
     delete state.sprintPredictions.sprintPredictions[roundStr][playerId];
   }
-  markDirty('sprintPredictions');
 
   // Remove from season predictions
   delete state.seasonPredictions.seasonPredictions[playerId];
-  markDirty('seasonPredictions');
 
   showToast(`Spieler "${player.name}" entfernt`, 'info');
   renderSeasonTab();
@@ -825,16 +989,6 @@ function initExportButtons() {
         }
       }
     });
-  });
-}
-
-// ── Before Unload Guard ────────────────────────────────
-function initBeforeUnload() {
-  window.addEventListener('beforeunload', e => {
-    if (state.dirty.size > 0) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
   });
 }
 

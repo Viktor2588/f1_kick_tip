@@ -15,6 +15,11 @@ import {
   isPerfectRound, isPerfectSprint,
 } from './scoring.js';
 
+import {
+  isLoggedIn, getPlayerIdFromSession, getSessionUser,
+  submitRacePrediction, submitSprintPrediction, submitSeasonPrediction,
+} from './api.js';
+
 // ---- Dashboard (index.html) ----
 
 export function renderDashboard(data) {
@@ -288,6 +293,10 @@ export function renderRaceDetail(data, round) {
 
   renderRaceHeader(season, race, results);
   renderRaceCountdown(race, results);
+  renderTipForm(season, race, predictions, results, data);
+  if (race.sprint) {
+    renderSprintTipForm(season, race, sprintPredictions, sprintResults, data);
+  }
   renderRacePredictions(season, race, predictions, results);
   if (race.sprint) {
     renderSprintPredictions(season, race, sprintPredictions, sprintResults);
@@ -686,6 +695,260 @@ function renderRacePointsBreakdown(season, race, predictions, results, sprintPre
   container.innerHTML = html;
 }
 
+// ---- Tip Forms (rennen.html) ----
+
+function driverSelectOptions(season, selected) {
+  return `<option value="">– Fahrer wählen –</option>` +
+    season.drivers.map(d =>
+      `<option value="${d.id}" ${d.id === selected ? 'selected' : ''}>${d.name} (#${d.number})</option>`
+    ).join('');
+}
+
+function teamSelectOptions(season, selected) {
+  return `<option value="">– Team wählen –</option>` +
+    season.teams.map(t =>
+      `<option value="${t.id}" ${t.id === selected ? 'selected' : ''}>${t.name}</option>`
+    ).join('');
+}
+
+function renderTipForm(season, race, predictions, results, data) {
+  const container = document.getElementById('tip-form-section');
+  if (!container) return;
+
+  const status = getDeadlineStatus(race, results);
+  if (status !== 'open') {
+    container.innerHTML = '';
+    return;
+  }
+
+  if (!isLoggedIn()) {
+    container.innerHTML = `
+      <div class="card tip-login-prompt">
+        <div class="text-center">
+          <p>Melde dich an, um deinen Tipp abzugeben</p>
+          <button class="btn btn-primary" onclick="window.__showLoginModal()">Anmelden</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const playerId = getPlayerIdFromSession();
+  if (!playerId) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const player = getPlayer(season, playerId);
+  const roundStr = String(race.round);
+  const existing = predictions.predictions?.[roundStr]?.[playerId];
+
+  container.innerHTML = `
+    <h2 class="section-title">Dein Tipp</h2>
+    <div class="card tip-form-card" ${player ? `style="border-left: 4px solid ${player.color}"` : ''}>
+      <div class="tip-form-header">
+        <span>${player ? `${player.emoji} ${player.name}` : playerId}</span>
+        ${existing ? '<span class="status-badge status-open">Tipp vorhanden – wird überschrieben</span>' : ''}
+      </div>
+      <form id="race-tip-form" class="admin-form-grid">
+        <div class="form-group">
+          <label class="form-label">Rennsieger</label>
+          <select class="form-select" name="winner" required>
+            ${driverSelectOptions(season, existing?.winner)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Podium P1</label>
+          <select class="form-select" name="podium_0" required>
+            ${driverSelectOptions(season, existing?.podium?.[0])}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Podium P2</label>
+          <select class="form-select" name="podium_1" required>
+            ${driverSelectOptions(season, existing?.podium?.[1])}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Podium P3</label>
+          <select class="form-select" name="podium_2" required>
+            ${driverSelectOptions(season, existing?.podium?.[2])}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pole Position</label>
+          <select class="form-select" name="pole">
+            ${driverSelectOptions(season, existing?.pole)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Schnellste Runde</label>
+          <select class="form-select" name="fastestLap">
+            ${driverSelectOptions(season, existing?.fastestLap)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bester Konstrukteur</label>
+          <select class="form-select" name="bestConstructor">
+            ${teamSelectOptions(season, existing?.bestConstructor)}
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Tipp abgeben</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  container.querySelector('#race-tip-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const fd = new FormData(form);
+    const submitBtn = form.querySelector('[type="submit"]');
+
+    const winner = fd.get('winner');
+    if (!winner) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Wird gespeichert...';
+
+    try {
+      await submitRacePrediction(race.round, playerId, {
+        winner,
+        podium: [fd.get('podium_0'), fd.get('podium_1'), fd.get('podium_2')],
+        pole: fd.get('pole') || '',
+        fastestLap: fd.get('fastestLap') || '',
+        bestConstructor: fd.get('bestConstructor') || '',
+      });
+      showTipToast('Tipp gespeichert!');
+      // Reload data to update predictions table
+      const newData = await import('./utils.js').then(m => m.loadAllData());
+      renderRacePredictions(season, race, newData.predictions, newData.results);
+      // Update the form to show "already submitted" badge
+      submitBtn.textContent = 'Tipp aktualisieren';
+      submitBtn.disabled = false;
+    } catch (err) {
+      showTipToast(err.message || 'Fehler beim Speichern', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Tipp abgeben';
+    }
+  });
+}
+
+function renderSprintTipForm(season, race, sprintPredictions, sprintResults, data) {
+  const container = document.getElementById('sprint-tip-form-section');
+  if (!container) return;
+
+  const status = getSprintDeadlineStatus(race, sprintResults);
+  if (status !== 'open') {
+    container.innerHTML = '';
+    return;
+  }
+
+  if (!isLoggedIn()) {
+    container.innerHTML = `
+      <div class="card tip-login-prompt">
+        <div class="text-center">
+          <p>Melde dich an, um deinen Sprint-Tipp abzugeben</p>
+          <button class="btn btn-primary" onclick="window.__showLoginModal()">Anmelden</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const playerId = getPlayerIdFromSession();
+  if (!playerId) { container.innerHTML = ''; return; }
+
+  const player = getPlayer(season, playerId);
+  const roundStr = String(race.round);
+  const existing = sprintPredictions.sprintPredictions?.[roundStr]?.[playerId];
+
+  container.innerHTML = `
+    <h2 class="section-title">Dein Sprint-Tipp</h2>
+    <div class="card tip-form-card" ${player ? `style="border-left: 4px solid ${player.color}"` : ''}>
+      <div class="tip-form-header">
+        <span>${player ? `${player.emoji} ${player.name}` : playerId} <span class="sprint-badge">Sprint</span></span>
+        ${existing ? '<span class="status-badge status-open">Tipp vorhanden</span>' : ''}
+      </div>
+      <form id="sprint-tip-form" class="admin-form-grid">
+        <div class="form-group">
+          <label class="form-label">Sprint-Sieger</label>
+          <select class="form-select" name="winner" required>
+            ${driverSelectOptions(season, existing?.winner)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sprint P1</label>
+          <select class="form-select" name="podium_0" required>
+            ${driverSelectOptions(season, existing?.podium?.[0])}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sprint P2</label>
+          <select class="form-select" name="podium_1" required>
+            ${driverSelectOptions(season, existing?.podium?.[1])}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sprint P3</label>
+          <select class="form-select" name="podium_2" required>
+            ${driverSelectOptions(season, existing?.podium?.[2])}
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Sprint-Tipp abgeben</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  container.querySelector('#sprint-tip-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const fd = new FormData(form);
+    const submitBtn = form.querySelector('[type="submit"]');
+
+    const winner = fd.get('winner');
+    if (!winner) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Wird gespeichert...';
+
+    try {
+      await submitSprintPrediction(race.round, playerId, {
+        winner,
+        podium: [fd.get('podium_0'), fd.get('podium_1'), fd.get('podium_2')],
+      });
+      showTipToast('Sprint-Tipp gespeichert!');
+      submitBtn.textContent = 'Sprint-Tipp aktualisieren';
+      submitBtn.disabled = false;
+    } catch (err) {
+      showTipToast(err.message || 'Fehler beim Speichern', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sprint-Tipp abgeben';
+    }
+  });
+}
+
+function showTipToast(message, type = 'success') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = `admin-notification ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 // ---- Season Tips (saison.html) ----
 
 export function renderSeasonPage(data) {
@@ -713,11 +976,14 @@ export function renderSeasonPage(data) {
     </div>
   `;
 
+  // Season tip form (only when open)
+  html += '<div id="season-tip-form"></div>';
+
   if (!locked && Object.keys(preds).length > 0) {
     html += `<div class="empty-state"><div class="empty-state-text">\ud83d\udd12 Tipps werden nach Start von Runde 1 angezeigt</div></div>`;
-  } else if (Object.keys(preds).length === 0) {
+  } else if (Object.keys(preds).length === 0 && locked) {
     html += `<div class="empty-state"><div class="empty-state-icon">\ud83c\udfaf</div><div class="empty-state-text">Noch keine Saison-Tipps abgegeben</div></div>`;
-  } else {
+  } else if (locked) {
     html += '<div class="season-tip-grid">';
     for (const player of season.players) {
       const pred = preds[player.id];
@@ -743,6 +1009,90 @@ export function renderSeasonPage(data) {
   }
 
   container.innerHTML = html;
+
+  // Render the season tip form if deadline is open
+  if (!locked) {
+    renderSeasonTipForm(season, seasonPredictions);
+  }
+}
+
+function renderSeasonTipForm(season, seasonPredictions) {
+  const container = document.getElementById('season-tip-form');
+  if (!container) return;
+
+  if (!isLoggedIn()) {
+    container.innerHTML = `
+      <div class="section">
+        <div class="card tip-login-prompt">
+          <div class="text-center">
+            <p>Melde dich an, um deinen Saison-Tipp abzugeben</p>
+            <button class="btn btn-primary" onclick="window.__showLoginModal()">Anmelden</button>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const playerId = getPlayerIdFromSession();
+  if (!playerId) { container.innerHTML = ''; return; }
+
+  const player = getPlayer(season, playerId);
+  const existing = seasonPredictions.seasonPredictions?.[playerId];
+
+  container.innerHTML = `
+    <div class="section">
+      <h2 class="section-title">Dein Saison-Tipp</h2>
+      <div class="card tip-form-card" ${player ? `style="border-left: 4px solid ${player.color}"` : ''}>
+        <div class="tip-form-header">
+          <span>${player ? `${player.emoji} ${player.name}` : playerId}</span>
+          ${existing ? '<span class="status-badge status-open">Tipp vorhanden – wird überschrieben</span>' : ''}
+        </div>
+        <form id="season-tip-form-inner" class="admin-form-grid">
+          <div class="form-group">
+            <label class="form-label">Weltmeister (WDC)</label>
+            <select class="form-select" name="wdc" required>
+              ${driverSelectOptions(season, existing?.wdc)}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Konstrukteurs-WM (WCC)</label>
+            <select class="form-select" name="wcc" required>
+              ${teamSelectOptions(season, existing?.wcc)}
+            </select>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Saison-Tipp abgeben</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  container.querySelector('#season-tip-form-inner').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const fd = new FormData(form);
+    const submitBtn = form.querySelector('[type="submit"]');
+
+    const wdc = fd.get('wdc');
+    const wcc = fd.get('wcc');
+    if (!wdc || !wcc) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Wird gespeichert...';
+
+    try {
+      await submitSeasonPrediction(playerId, { wdc, wcc });
+      showTipToast('Saison-Tipp gespeichert!');
+      submitBtn.textContent = 'Saison-Tipp aktualisieren';
+      submitBtn.disabled = false;
+    } catch (err) {
+      showTipToast(err.message || 'Fehler beim Speichern', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Saison-Tipp abgeben';
+    }
+  });
 }
 
 // ---- Rules Page (regeln.html) ----
