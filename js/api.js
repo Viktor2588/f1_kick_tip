@@ -1,9 +1,64 @@
 // ========================================
-// F1 Kick Tip 2026 – Neon API Client
+// F1 Kick Tip 2026 – Neon Serverless Client
 // ========================================
 
-// ── Configuration ────────────────────────────────────────
-const DATA_API_URL = 'https://ep-summer-field-akisi0lv.apirest.c-3.us-west-2.aws.neon.tech/neondb/rest/v1';
+// ── Database Connection (Neon SQL-over-HTTP) ────────────
+const NEON_HOST = 'ep-summer-field-akisi0lv.c-3.us-west-2.aws.neon.tech';
+const CONNECTION_STRING = 'postgresql://neondb_owner:npg_I5ZK8GWBerMt@ep-summer-field-akisi0lv.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require';
+
+/**
+ * Execute a parameterized SQL query via Neon HTTP API.
+ * Returns rows as array of objects.
+ */
+async function query(queryText, params = []) {
+  const resp = await fetch(`https://${NEON_HOST}/sql`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Neon-Connection-String': CONNECTION_STRING,
+    },
+    body: JSON.stringify([{ query: queryText, params }]),
+  });
+
+  if (!resp.ok) {
+    const errText = await resp.text().catch(() => '');
+    throw new Error(`DB-Fehler ${resp.status}: ${errText}`);
+  }
+
+  const data = await resp.json();
+  const result = data.results[0];
+  if (result.error) throw new Error(result.error.message || 'SQL-Fehler');
+
+  const fields = result.fields.map(f => f.name);
+  return result.rows.map(row => {
+    const obj = {};
+    fields.forEach((name, i) => { obj[name] = row[i]; });
+    return obj;
+  });
+}
+
+/**
+ * Execute SQL without returning rows (INSERT/UPDATE/DELETE).
+ */
+async function execute(queryText, params = []) {
+  const resp = await fetch(`https://${NEON_HOST}/sql`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Neon-Connection-String': CONNECTION_STRING,
+    },
+    body: JSON.stringify([{ query: queryText, params }]),
+  });
+
+  if (!resp.ok) {
+    const errText = await resp.text().catch(() => '');
+    throw new Error(`DB-Fehler ${resp.status}: ${errText}`);
+  }
+
+  const data = await resp.json();
+  const result = data.results[0];
+  if (result.error) throw new Error(result.error.message || 'SQL-Fehler');
+}
 
 // ── Player Identity (localStorage-based, like when2meet) ─
 
@@ -28,45 +83,11 @@ export function getPlayerIdFromSession() {
   return getCurrentPlayer();
 }
 
-// ── Data API Helpers ─────────────────────────────────────
-
-async function apiGet(table, query = '') {
-  const resp = await fetch(`${DATA_API_URL}/${table}${query}`);
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err.message || `API-Fehler: ${resp.status}`);
-  }
-  return resp.json();
-}
-
-async function apiUpsert(table, data) {
-  const headers = {
-    'Content-Type': 'application/json',
-    'Prefer': 'resolution=merge-duplicates',
-  };
-
-  const resp = await fetch(`${DATA_API_URL}/${table}`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(data),
-  });
-
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err.message || `API-Fehler: ${resp.status}`);
-  }
-  return resp;
-}
-
 // ── Read Functions (DB → App Format) ─────────────────────
 
-/**
- * Fetch all race predictions and transform to app format.
- * DB rows → { predictions: { "1": { "thomas": { winner, podium:[], ... } } } }
- */
 export async function fetchPredictions() {
   try {
-    const rows = await apiGet('race_predictions', '?select=*');
+    const rows = await query('SELECT * FROM race_predictions');
     const predictions = {};
 
     for (const row of rows) {
@@ -83,18 +104,15 @@ export async function fetchPredictions() {
     }
 
     return { predictions };
-  } catch {
+  } catch (e) {
+    console.error('fetchPredictions:', e);
     return { predictions: {} };
   }
 }
 
-/**
- * Fetch all sprint predictions.
- * DB rows → { sprintPredictions: { "4": { "thomas": { winner, podium:[] } } } }
- */
 export async function fetchSprintPredictions() {
   try {
-    const rows = await apiGet('sprint_predictions', '?select=*');
+    const rows = await query('SELECT * FROM sprint_predictions');
     const sprintPredictions = {};
 
     for (const row of rows) {
@@ -108,18 +126,15 @@ export async function fetchSprintPredictions() {
     }
 
     return { sprintPredictions };
-  } catch {
+  } catch (e) {
+    console.error('fetchSprintPredictions:', e);
     return { sprintPredictions: {} };
   }
 }
 
-/**
- * Fetch all season predictions.
- * DB rows → { seasonPredictions: { "thomas": { wdc, wcc, submittedAt } } }
- */
 export async function fetchSeasonPredictions() {
   try {
-    const rows = await apiGet('season_predictions', '?select=*');
+    const rows = await query('SELECT * FROM season_predictions');
     const seasonPredictions = {};
 
     for (const row of rows) {
@@ -131,18 +146,15 @@ export async function fetchSeasonPredictions() {
     }
 
     return { seasonPredictions };
-  } catch {
+  } catch (e) {
+    console.error('fetchSeasonPredictions:', e);
     return { seasonPredictions: {} };
   }
 }
 
-/**
- * Fetch all race results.
- * DB rows → { results: { "1": { winner, podium:[], pole, ... } } }
- */
 export async function fetchResults() {
   try {
-    const rows = await apiGet('race_results', '?select=*');
+    const rows = await query('SELECT * FROM race_results');
     const results = {};
 
     for (const row of rows) {
@@ -159,18 +171,15 @@ export async function fetchResults() {
     }
 
     return { results };
-  } catch {
+  } catch (e) {
+    console.error('fetchResults:', e);
     return { results: {} };
   }
 }
 
-/**
- * Fetch all sprint results.
- * DB rows → { sprintResults: { "4": { winner, podium:[] } } }
- */
 export async function fetchSprintResults() {
   try {
-    const rows = await apiGet('sprint_results', '?select=*');
+    const rows = await query('SELECT * FROM sprint_results');
     const sprintResults = {};
 
     for (const row of rows) {
@@ -183,106 +192,81 @@ export async function fetchSprintResults() {
     }
 
     return { sprintResults };
-  } catch {
+  } catch (e) {
+    console.error('fetchSprintResults:', e);
     return { sprintResults: {} };
   }
 }
 
 // ── Write Functions (App → DB) ───────────────────────────
 
-/**
- * Submit or update a race prediction.
- */
 export async function submitRacePrediction(round, playerId, data) {
-  return apiUpsert('race_predictions', {
-    round,
-    player_id: playerId,
-    winner: data.winner,
-    podium_p1: data.podium[0] || '',
-    podium_p2: data.podium[1] || '',
-    podium_p3: data.podium[2] || '',
-    pole: data.pole || '',
-    fastest_lap: data.fastestLap || '',
-    best_constructor: data.bestConstructor || '',
-    submitted_at: new Date().toISOString(),
-  });
+  await execute(
+    `INSERT INTO race_predictions (round, player_id, winner, podium_p1, podium_p2, podium_p3, pole, fastest_lap, best_constructor, submitted_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+     ON CONFLICT (round, player_id) DO UPDATE SET
+       winner = EXCLUDED.winner, podium_p1 = EXCLUDED.podium_p1, podium_p2 = EXCLUDED.podium_p2,
+       podium_p3 = EXCLUDED.podium_p3, pole = EXCLUDED.pole, fastest_lap = EXCLUDED.fastest_lap,
+       best_constructor = EXCLUDED.best_constructor, submitted_at = EXCLUDED.submitted_at`,
+    [round, playerId, data.winner, data.podium[0] || '', data.podium[1] || '', data.podium[2] || '',
+     data.pole || '', data.fastestLap || '', data.bestConstructor || '', new Date().toISOString()]
+  );
 }
 
-/**
- * Submit or update a sprint prediction.
- */
 export async function submitSprintPrediction(round, playerId, data) {
-  return apiUpsert('sprint_predictions', {
-    round,
-    player_id: playerId,
-    winner: data.winner,
-    podium_p1: data.podium[0] || '',
-    podium_p2: data.podium[1] || '',
-    podium_p3: data.podium[2] || '',
-    submitted_at: new Date().toISOString(),
-  });
+  await execute(
+    `INSERT INTO sprint_predictions (round, player_id, winner, podium_p1, podium_p2, podium_p3, submitted_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT (round, player_id) DO UPDATE SET
+       winner = EXCLUDED.winner, podium_p1 = EXCLUDED.podium_p1,
+       podium_p2 = EXCLUDED.podium_p2, podium_p3 = EXCLUDED.podium_p3,
+       submitted_at = EXCLUDED.submitted_at`,
+    [round, playerId, data.winner, data.podium[0] || '', data.podium[1] || '', data.podium[2] || '',
+     new Date().toISOString()]
+  );
 }
 
-/**
- * Submit or update a season prediction.
- */
 export async function submitSeasonPrediction(playerId, data) {
-  return apiUpsert('season_predictions', {
-    player_id: playerId,
-    wdc: data.wdc,
-    wcc: data.wcc,
-    submitted_at: new Date().toISOString(),
-  });
+  await execute(
+    `INSERT INTO season_predictions (player_id, wdc, wcc, submitted_at)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (player_id) DO UPDATE SET
+       wdc = EXCLUDED.wdc, wcc = EXCLUDED.wcc, submitted_at = EXCLUDED.submitted_at`,
+    [playerId, data.wdc, data.wcc, new Date().toISOString()]
+  );
 }
 
-/**
- * Submit or update a race result (admin).
- */
 export async function submitRaceResult(round, data) {
-  return apiUpsert('race_results', {
-    round,
-    winner: data.winner,
-    podium_p1: data.podium[0] || '',
-    podium_p2: data.podium[1] || '',
-    podium_p3: data.podium[2] || '',
-    pole: data.pole || '',
-    fastest_lap: data.fastestLap || '',
-    best_constructor: data.bestConstructor || '',
-    top_ten: data.topTen || null,
-    entered_at: new Date().toISOString(),
-  });
+  await execute(
+    `INSERT INTO race_results (round, winner, podium_p1, podium_p2, podium_p3, pole, fastest_lap, best_constructor, top_ten, entered_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+     ON CONFLICT (round) DO UPDATE SET
+       winner = EXCLUDED.winner, podium_p1 = EXCLUDED.podium_p1, podium_p2 = EXCLUDED.podium_p2,
+       podium_p3 = EXCLUDED.podium_p3, pole = EXCLUDED.pole, fastest_lap = EXCLUDED.fastest_lap,
+       best_constructor = EXCLUDED.best_constructor, top_ten = EXCLUDED.top_ten, entered_at = EXCLUDED.entered_at`,
+    [round, data.winner, data.podium[0] || '', data.podium[1] || '', data.podium[2] || '',
+     data.pole || '', data.fastestLap || '', data.bestConstructor || '', data.topTen || null,
+     new Date().toISOString()]
+  );
 }
 
-/**
- * Submit or update a sprint result (admin).
- */
 export async function submitSprintResult(round, data) {
-  return apiUpsert('sprint_results', {
-    round,
-    winner: data.winner,
-    podium_p1: data.podium[0] || '',
-    podium_p2: data.podium[1] || '',
-    podium_p3: data.podium[2] || '',
-    entered_at: new Date().toISOString(),
-  });
+  await execute(
+    `INSERT INTO sprint_results (round, winner, podium_p1, podium_p2, podium_p3, entered_at)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (round) DO UPDATE SET
+       winner = EXCLUDED.winner, podium_p1 = EXCLUDED.podium_p1,
+       podium_p2 = EXCLUDED.podium_p2, podium_p3 = EXCLUDED.podium_p3,
+       entered_at = EXCLUDED.entered_at`,
+    [round, data.winner, data.podium[0] || '', data.podium[1] || '', data.podium[2] || '',
+     new Date().toISOString()]
+  );
 }
 
-/**
- * Delete a race result (admin).
- */
 export async function deleteRaceResult(round) {
-  const resp = await fetch(`${DATA_API_URL}/race_results?round=eq.${round}`, {
-    method: 'DELETE',
-  });
-  if (!resp.ok) throw new Error('Fehler beim Löschen');
+  await execute('DELETE FROM race_results WHERE round = $1', [round]);
 }
 
-/**
- * Delete a sprint result (admin).
- */
 export async function deleteSprintResult(round) {
-  const resp = await fetch(`${DATA_API_URL}/sprint_results?round=eq.${round}`, {
-    method: 'DELETE',
-  });
-  if (!resp.ok) throw new Error('Fehler beim Löschen');
+  await execute('DELETE FROM sprint_results WHERE round = $1', [round]);
 }

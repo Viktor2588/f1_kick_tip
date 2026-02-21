@@ -697,6 +697,27 @@ function renderRacePointsBreakdown(season, race, predictions, results, sprintPre
 
 // ---- Tip Forms (rennen.html) ----
 
+function tipLabel(text, tooltip) {
+  return `${text} <span class="tip-info">i<span class="tip-tooltip">${tooltip}</span></span>`;
+}
+
+// Tooltip texts for each tip category
+const TIP_HINTS = {
+  winner: '5 Punkte wenn du den Rennsieger richtig tippst.',
+  podium0: '3 Punkte bei richtiger Position. 1 Punkt wenn der Fahrer auf dem Podium landet, aber auf einer anderen Position.',
+  podium1: '2 Punkte bei richtiger Position. 1 Punkt wenn der Fahrer auf dem Podium landet, aber auf einer anderen Position.',
+  podium2: '2 Punkte bei richtiger Position. 1 Punkt wenn der Fahrer auf dem Podium landet, aber auf einer anderen Position.',
+  pole: '3 Punkte wenn du den Pole-Sitter richtig tippst. Das ist der Fahrer, der im Qualifying die schnellste Runde fährt.',
+  fastestLap: '3 Punkte wenn du tippst, wer die schnellste Runde im Rennen fährt.',
+  bestConstructor: '3 Punkte wenn du tippst, welches Team die meisten Punkte in diesem Rennen holt.',
+  sprintWinner: '3 Punkte wenn du den Sprint-Sieger richtig tippst.',
+  sprintP0: 'Gleich wie Sprint-Sieger – wer gewinnt den Sprint?',
+  sprintP1: '1 Punkt bei richtiger Position. 1 Punkt Bonus wenn auf dem Podium aber falsche Position.',
+  sprintP2: '1 Punkt bei richtiger Position. 1 Punkt Bonus wenn auf dem Podium aber falsche Position.',
+  wdc: '20 Punkte am Saisonende, wenn du den Fahrer-Weltmeister richtig tippst. Muss vor Runde 1 abgegeben werden.',
+  wcc: '15 Punkte am Saisonende, wenn du das Konstrukteurs-WM-Team richtig tippst. Muss vor Runde 1 abgegeben werden.',
+};
+
 function driverSelectOptions(season, selected) {
   return `<option value="">– Fahrer wählen –</option>` +
     season.drivers.map(d =>
@@ -709,6 +730,186 @@ function teamSelectOptions(season, selected) {
     season.teams.map(t =>
       `<option value="${t.id}" ${t.id === selected ? 'selected' : ''}>${t.name}</option>`
     ).join('');
+}
+
+// ---- Searchable Dropdown Component ----
+
+let searchSelectCounter = 0;
+
+function getTeamForDriver(season, driverId) {
+  const driver = season.drivers.find(d => d.id === driverId);
+  if (!driver) return null;
+  return season.teams.find(t => t.id === driver.team) || null;
+}
+
+function driverSearchSelect(season, name, selected, required = false) {
+  const id = `ss-${name}-${++searchSelectCounter}`;
+  const selDriver = season.drivers.find(d => d.id === selected);
+  const selTeam = selDriver ? getTeamForDriver(season, selDriver.id) : null;
+
+  const displayHtml = selDriver
+    ? `<span class="ss-selected-display">
+        <span class="ss-selected-color" style="background:${selTeam?.color || '#666'}"></span>
+        <span class="ss-selected-number">#${selDriver.number}</span>
+        ${selDriver.name}
+      </span>`
+    : '<span class="ss-placeholder">– Fahrer wählen –</span>';
+
+  const optionsHtml = season.drivers.map(d => {
+    const team = getTeamForDriver(season, d.id);
+    return `<div class="ss-option ${d.id === selected ? 'selected' : ''}" data-value="${d.id}" data-search="${d.name.toLowerCase()} ${d.number} ${team?.name.toLowerCase() || ''}">
+      <span class="ss-option-color" style="background:${team?.color || '#666'}"></span>
+      <span class="ss-option-number">#${d.number}</span>
+      <span class="ss-option-name">${d.name}</span>
+      <span class="ss-option-team">${team?.name || ''}</span>
+    </div>`;
+  }).join('');
+
+  return `<div class="search-select" id="${id}" data-name="${name}" data-value="${selected || ''}" ${required ? 'data-required="true"' : ''}>
+    <div class="search-select-trigger">${displayHtml}<span class="ss-arrow">▼</span></div>
+    <div class="search-select-dropdown">
+      <div class="ss-search"><input type="text" placeholder="Suchen..." autocomplete="off"></div>
+      <div class="ss-options">${optionsHtml}</div>
+    </div>
+  </div>`;
+}
+
+function teamSearchSelect(season, name, selected, required = false) {
+  const id = `ss-${name}-${++searchSelectCounter}`;
+  const selTeam = season.teams.find(t => t.id === selected);
+
+  const displayHtml = selTeam
+    ? `<span class="ss-selected-display">
+        <span class="ss-selected-color" style="background:${selTeam.color}"></span>
+        ${selTeam.name}
+      </span>`
+    : '<span class="ss-placeholder">– Team wählen –</span>';
+
+  const optionsHtml = season.teams.map(t => {
+    return `<div class="ss-option ${t.id === selected ? 'selected' : ''}" data-value="${t.id}" data-search="${t.name.toLowerCase()} ${t.drivers.join(' ')}">
+      <span class="ss-option-color" style="background:${t.color}"></span>
+      <span class="ss-option-name">${t.name}</span>
+    </div>`;
+  }).join('');
+
+  return `<div class="search-select" id="${id}" data-name="${name}" data-value="${selected || ''}" ${required ? 'data-required="true"' : ''}>
+    <div class="search-select-trigger">${displayHtml}<span class="ss-arrow">▼</span></div>
+    <div class="search-select-dropdown">
+      <div class="ss-search"><input type="text" placeholder="Suchen..." autocomplete="off"></div>
+      <div class="ss-options">${optionsHtml}</div>
+    </div>
+  </div>`;
+}
+
+/**
+ * Initialize all search-select dropdowns within a container.
+ */
+function initSearchSelects(container) {
+  container.querySelectorAll('.search-select').forEach(ss => {
+    const trigger = ss.querySelector('.search-select-trigger');
+    const dropdown = ss.querySelector('.search-select-dropdown');
+    const searchInput = ss.querySelector('.ss-search input');
+    const optionsContainer = ss.querySelector('.ss-options');
+    const allOptions = ss.querySelectorAll('.ss-option');
+
+    function open() {
+      // Close all other open dropdowns
+      document.querySelectorAll('.search-select.open').forEach(other => {
+        if (other !== ss) close(other);
+      });
+      ss.classList.add('open');
+      trigger.classList.add('open');
+      searchInput.value = '';
+      filterOptions('');
+      setTimeout(() => searchInput.focus(), 10);
+    }
+
+    function close(el) {
+      el = el || ss;
+      el.classList.remove('open');
+      el.querySelector('.search-select-trigger').classList.remove('open');
+    }
+
+    function filterOptions(query) {
+      const q = query.toLowerCase();
+      let visible = 0;
+      allOptions.forEach(opt => {
+        const match = !q || opt.dataset.search.includes(q);
+        opt.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      // Show/hide no results
+      let noRes = optionsContainer.querySelector('.ss-no-results');
+      if (visible === 0) {
+        if (!noRes) {
+          noRes = document.createElement('div');
+          noRes.className = 'ss-no-results';
+          noRes.textContent = 'Kein Ergebnis';
+          optionsContainer.appendChild(noRes);
+        }
+        noRes.style.display = '';
+      } else if (noRes) {
+        noRes.style.display = 'none';
+      }
+    }
+
+    function selectOption(opt) {
+      const value = opt.dataset.value;
+      ss.dataset.value = value;
+
+      // Update display
+      const displayParts = [];
+      const colorEl = opt.querySelector('.ss-option-color');
+      if (colorEl) displayParts.push(`<span class="ss-selected-color" style="background:${colorEl.style.background}"></span>`);
+      const numEl = opt.querySelector('.ss-option-number');
+      if (numEl) displayParts.push(`<span class="ss-selected-number">${numEl.textContent}</span>`);
+      const nameEl = opt.querySelector('.ss-option-name');
+      displayParts.push(nameEl.textContent);
+
+      trigger.innerHTML = `<span class="ss-selected-display">${displayParts.join(' ')}</span><span class="ss-arrow">▼</span>`;
+
+      // Update selected state
+      allOptions.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+
+      close();
+    }
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (ss.classList.contains('open')) close();
+      else open();
+    });
+
+    searchInput.addEventListener('input', () => filterOptions(searchInput.value));
+    searchInput.addEventListener('click', (e) => e.stopPropagation());
+
+    allOptions.forEach(opt => {
+      opt.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectOption(opt);
+      });
+    });
+  });
+
+  // Close on outside click
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.search-select.open').forEach(ss => {
+      ss.classList.remove('open');
+      ss.querySelector('.search-select-trigger').classList.remove('open');
+    });
+  });
+}
+
+/**
+ * Collect values from search-selects as if they were form fields.
+ */
+function getSearchSelectValues(container) {
+  const values = {};
+  container.querySelectorAll('.search-select').forEach(ss => {
+    values[ss.dataset.name] = ss.dataset.value || '';
+  });
+  return values;
 }
 
 function renderTipForm(season, race, predictions, results, data) {
@@ -750,81 +951,68 @@ function renderTipForm(season, race, predictions, results, data) {
         <span>${player ? `${player.emoji} ${player.name}` : playerId}</span>
         ${existing ? '<span class="status-badge status-open">Tipp vorhanden – wird überschrieben</span>' : ''}
       </div>
-      <form id="race-tip-form" class="admin-form-grid">
+      <div id="race-tip-form" class="admin-form-grid">
         <div class="form-group">
-          <label class="form-label">Rennsieger</label>
-          <select class="form-select" name="winner" required>
-            ${driverSelectOptions(season, existing?.winner)}
-          </select>
+          <label class="form-label">${tipLabel('Rennsieger', TIP_HINTS.winner)}</label>
+          ${driverSearchSelect(season, 'winner', existing?.winner, true)}
         </div>
         <div class="form-group">
-          <label class="form-label">Podium P1</label>
-          <select class="form-select" name="podium_0" required>
-            ${driverSelectOptions(season, existing?.podium?.[0])}
-          </select>
+          <label class="form-label">${tipLabel('Podium P1', TIP_HINTS.podium0)}</label>
+          ${driverSearchSelect(season, 'podium_0', existing?.podium?.[0], true)}
         </div>
         <div class="form-group">
-          <label class="form-label">Podium P2</label>
-          <select class="form-select" name="podium_1" required>
-            ${driverSelectOptions(season, existing?.podium?.[1])}
-          </select>
+          <label class="form-label">${tipLabel('Podium P2', TIP_HINTS.podium1)}</label>
+          ${driverSearchSelect(season, 'podium_1', existing?.podium?.[1], true)}
         </div>
         <div class="form-group">
-          <label class="form-label">Podium P3</label>
-          <select class="form-select" name="podium_2" required>
-            ${driverSelectOptions(season, existing?.podium?.[2])}
-          </select>
+          <label class="form-label">${tipLabel('Podium P3', TIP_HINTS.podium2)}</label>
+          ${driverSearchSelect(season, 'podium_2', existing?.podium?.[2], true)}
         </div>
         <div class="form-group">
-          <label class="form-label">Pole Position</label>
-          <select class="form-select" name="pole">
-            ${driverSelectOptions(season, existing?.pole)}
-          </select>
+          <label class="form-label">${tipLabel('Pole Position', TIP_HINTS.pole)}</label>
+          ${driverSearchSelect(season, 'pole', existing?.pole)}
         </div>
         <div class="form-group">
-          <label class="form-label">Schnellste Runde</label>
-          <select class="form-select" name="fastestLap">
-            ${driverSelectOptions(season, existing?.fastestLap)}
-          </select>
+          <label class="form-label">${tipLabel('Schnellste Runde', TIP_HINTS.fastestLap)}</label>
+          ${driverSearchSelect(season, 'fastestLap', existing?.fastestLap)}
         </div>
         <div class="form-group">
-          <label class="form-label">Bester Konstrukteur</label>
-          <select class="form-select" name="bestConstructor">
-            ${teamSelectOptions(season, existing?.bestConstructor)}
-          </select>
+          <label class="form-label">${tipLabel('Bester Konstrukteur', TIP_HINTS.bestConstructor)}</label>
+          ${teamSearchSelect(season, 'bestConstructor', existing?.bestConstructor)}
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Tipp abgeben</button>
+          <button type="button" class="btn btn-primary" id="race-tip-submit">Tipp abgeben</button>
         </div>
-      </form>
+      </div>
     </div>
   `;
 
-  container.querySelector('#race-tip-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const fd = new FormData(form);
-    const submitBtn = form.querySelector('[type="submit"]');
+  const formEl = container.querySelector('#race-tip-form');
+  initSearchSelects(formEl);
 
-    const winner = fd.get('winner');
-    if (!winner) return;
+  container.querySelector('#race-tip-submit').addEventListener('click', async () => {
+    const vals = getSearchSelectValues(formEl);
+    const submitBtn = container.querySelector('#race-tip-submit');
+
+    if (!vals.winner) {
+      showTipToast('Bitte Rennsieger wählen', 'error');
+      return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gespeichert...';
 
     try {
       await submitRacePrediction(race.round, playerId, {
-        winner,
-        podium: [fd.get('podium_0'), fd.get('podium_1'), fd.get('podium_2')],
-        pole: fd.get('pole') || '',
-        fastestLap: fd.get('fastestLap') || '',
-        bestConstructor: fd.get('bestConstructor') || '',
+        winner: vals.winner,
+        podium: [vals.podium_0, vals.podium_1, vals.podium_2],
+        pole: vals.pole || '',
+        fastestLap: vals.fastestLap || '',
+        bestConstructor: vals.bestConstructor || '',
       });
       showTipToast('Tipp gespeichert!');
-      // Reload data to update predictions table
       const newData = await import('./utils.js').then(m => m.loadAllData());
       renderRacePredictions(season, race, newData.predictions, newData.results);
-      // Update the form to show "already submitted" badge
       submitBtn.textContent = 'Tipp aktualisieren';
       submitBtn.disabled = false;
     } catch (err) {
@@ -871,54 +1059,49 @@ function renderSprintTipForm(season, race, sprintPredictions, sprintResults, dat
         <span>${player ? `${player.emoji} ${player.name}` : playerId} <span class="sprint-badge">Sprint</span></span>
         ${existing ? '<span class="status-badge status-open">Tipp vorhanden</span>' : ''}
       </div>
-      <form id="sprint-tip-form" class="admin-form-grid">
+      <div id="sprint-tip-form" class="admin-form-grid">
         <div class="form-group">
-          <label class="form-label">Sprint-Sieger</label>
-          <select class="form-select" name="winner" required>
-            ${driverSelectOptions(season, existing?.winner)}
-          </select>
+          <label class="form-label">${tipLabel('Sprint-Sieger', TIP_HINTS.sprintWinner)}</label>
+          ${driverSearchSelect(season, 'winner', existing?.winner, true)}
         </div>
         <div class="form-group">
-          <label class="form-label">Sprint P1</label>
-          <select class="form-select" name="podium_0" required>
-            ${driverSelectOptions(season, existing?.podium?.[0])}
-          </select>
+          <label class="form-label">${tipLabel('Sprint P1', TIP_HINTS.sprintP0)}</label>
+          ${driverSearchSelect(season, 'podium_0', existing?.podium?.[0], true)}
         </div>
         <div class="form-group">
-          <label class="form-label">Sprint P2</label>
-          <select class="form-select" name="podium_1" required>
-            ${driverSelectOptions(season, existing?.podium?.[1])}
-          </select>
+          <label class="form-label">${tipLabel('Sprint P2', TIP_HINTS.sprintP1)}</label>
+          ${driverSearchSelect(season, 'podium_1', existing?.podium?.[1], true)}
         </div>
         <div class="form-group">
-          <label class="form-label">Sprint P3</label>
-          <select class="form-select" name="podium_2" required>
-            ${driverSelectOptions(season, existing?.podium?.[2])}
-          </select>
+          <label class="form-label">${tipLabel('Sprint P3', TIP_HINTS.sprintP2)}</label>
+          ${driverSearchSelect(season, 'podium_2', existing?.podium?.[2], true)}
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Sprint-Tipp abgeben</button>
+          <button type="button" class="btn btn-primary" id="sprint-tip-submit">Sprint-Tipp abgeben</button>
         </div>
-      </form>
+      </div>
     </div>
   `;
 
-  container.querySelector('#sprint-tip-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const fd = new FormData(form);
-    const submitBtn = form.querySelector('[type="submit"]');
+  const sprintFormEl = container.querySelector('#sprint-tip-form');
+  initSearchSelects(sprintFormEl);
 
-    const winner = fd.get('winner');
-    if (!winner) return;
+  container.querySelector('#sprint-tip-submit').addEventListener('click', async () => {
+    const vals = getSearchSelectValues(sprintFormEl);
+    const submitBtn = container.querySelector('#sprint-tip-submit');
+
+    if (!vals.winner) {
+      showTipToast('Bitte Sprint-Sieger wählen', 'error');
+      return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gespeichert...';
 
     try {
       await submitSprintPrediction(race.round, playerId, {
-        winner,
-        podium: [fd.get('podium_0'), fd.get('podium_1'), fd.get('podium_2')],
+        winner: vals.winner,
+        podium: [vals.podium_0, vals.podium_1, vals.podium_2],
       });
       showTipToast('Sprint-Tipp gespeichert!');
       submitBtn.textContent = 'Sprint-Tipp aktualisieren';
@@ -1048,42 +1231,40 @@ function renderSeasonTipForm(season, seasonPredictions) {
           <span>${player ? `${player.emoji} ${player.name}` : playerId}</span>
           ${existing ? '<span class="status-badge status-open">Tipp vorhanden – wird überschrieben</span>' : ''}
         </div>
-        <form id="season-tip-form-inner" class="admin-form-grid">
+        <div id="season-tip-form-inner" class="admin-form-grid">
           <div class="form-group">
-            <label class="form-label">Weltmeister (WDC)</label>
-            <select class="form-select" name="wdc" required>
-              ${driverSelectOptions(season, existing?.wdc)}
-            </select>
+            <label class="form-label">${tipLabel('Weltmeister (WDC)', TIP_HINTS.wdc)}</label>
+            ${driverSearchSelect(season, 'wdc', existing?.wdc, true)}
           </div>
           <div class="form-group">
-            <label class="form-label">Konstrukteurs-WM (WCC)</label>
-            <select class="form-select" name="wcc" required>
-              ${teamSelectOptions(season, existing?.wcc)}
-            </select>
+            <label class="form-label">${tipLabel('Konstrukteurs-WM (WCC)', TIP_HINTS.wcc)}</label>
+            ${teamSearchSelect(season, 'wcc', existing?.wcc, true)}
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Saison-Tipp abgeben</button>
+            <button type="button" class="btn btn-primary" id="season-tip-submit">Saison-Tipp abgeben</button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   `;
 
-  container.querySelector('#season-tip-form-inner').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const fd = new FormData(form);
-    const submitBtn = form.querySelector('[type="submit"]');
+  const seasonFormEl = container.querySelector('#season-tip-form-inner');
+  initSearchSelects(seasonFormEl);
 
-    const wdc = fd.get('wdc');
-    const wcc = fd.get('wcc');
-    if (!wdc || !wcc) return;
+  container.querySelector('#season-tip-submit').addEventListener('click', async () => {
+    const vals = getSearchSelectValues(seasonFormEl);
+    const submitBtn = container.querySelector('#season-tip-submit');
+
+    if (!vals.wdc || !vals.wcc) {
+      showTipToast('Bitte WDC und WCC wählen', 'error');
+      return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gespeichert...';
 
     try {
-      await submitSeasonPrediction(playerId, { wdc, wcc });
+      await submitSeasonPrediction(playerId, { wdc: vals.wdc, wcc: vals.wcc });
       showTipToast('Saison-Tipp gespeichert!');
       submitBtn.textContent = 'Saison-Tipp aktualisieren';
       submitBtn.disabled = false;
