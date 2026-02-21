@@ -1,0 +1,108 @@
+{
+  "predictions": {
+    "1": {
+      "thomas": {
+        "winner": "verstappen",
+        "podium": ["verstappen", "norris", "leclerc"],
+        "pole": "verstappen",
+        "fastestLap": "norris",
+        "bestConstructor": "mclaren",
+        "submittedAt": "2026-03-07T10:00:00Z"
+      },
+      "julia": {
+        "winner": "norris",
+        "podium": ["norris", "verstappen", "hamilton"],
+        "pole": "verstappen",
+        "fastestLap": "piastri",
+        "bestConstructor": "mclaren",
+        "submittedAt": "2026-03-07T14:00:00Z"
+      },
+      "viktor": {
+        "winner": "verstappen",
+        "podium": ["verstappen", "hamilton", "norris"],
+        "pole": "norris",
+        "fastestLap": "verstappen",
+        "bestConstructor": "redbull",
+        "submittedAt": "2026-03-07T18:00:00Z"
+      }
+    },
+    "2": {
+      "thomas": {
+        "winner": "norris",
+        "podium": ["norris", "piastri", "leclerc"],
+        "pole": "norris",
+        "fastestLap": "piastri",
+        "bestConstructor": "mclaren",
+        "submittedAt": "2026-03-14T10:00:00Z"
+      },
+      "julia": {
+        "winner": "norris",
+        "podium": ["norris", "leclerc", "piastri"],
+        "pole": "verstappen",
+        "fastestLap": "norris",
+        "bestConstructor": "ferrari",
+        "submittedAt": "2026-03-14T12:00:00Z"
+      },
+      "viktor": {
+        "winner": "piastri",
+        "podium": ["piastri", "norris", "verstappen"],
+        "pole": "norris",
+        "fastestLap": "leclerc",
+        "bestConstructor": "mclaren",
+        "submittedAt": "2026-03-14T15:00:00Z"
+      }
+    },
+    "3": {
+      "thomas": {
+        "winner": "leclerc",
+        "podium": ["leclerc", "verstappen", "hamilton"],
+        "pole": "verstappen",
+        "fastestLap": "leclerc",
+        "bestConstructor": "ferrari",
+        "submittedAt": "2026-03-28T10:00:00Z"
+      },
+      "julia": {
+        "winner": "hamilton",
+        "podium": ["hamilton", "leclerc", "norris"],
+        "pole": "leclerc",
+        "fastestLap": "hamilton",
+        "bestConstructor": "ferrari",
+        "submittedAt": "2026-03-28T14:00:00Z"
+      },
+      "viktor": {
+        "winner": "verstappen",
+        "podium": ["verstappen", "norris", "leclerc"],
+        "pole": "verstappen",
+        "fastestLap": "norris",
+        "bestConstructor": "redbull",
+        "submittedAt": "2026-03-29T07:30:00Z"
+      }
+    },
+    "4": {
+      "thomas": {
+        "winner": "verstappen",
+        "podium": ["verstappen", "hamilton", "norris"],
+        "pole": "verstappen",
+        "fastestLap": "norris",
+        "bestConstructor": "mclaren",
+        "submittedAt": "2026-04-11T10:00:00Z"
+      },
+      "julia": {
+        "winner": "hamilton",
+        "podium": ["hamilton", "norris", "leclerc"],
+        "pole": "hamilton",
+        "fastestLap": "leclerc",
+        "bestConstructor": "ferrari",
+        "submittedAt": "2026-04-11T12:00:00Z"
+      },
+      "viktor": {
+        "winner": "norris",
+        "podium": ["norris", "verstappen", "leclerc"],
+        "pole": "norris",
+        "fastestLap": "verstappen",
+        "bestConstructor": "mclaren",
+        "submittedAt": "2026-04-11T14:00:00Z"
+      }
+    }
+  }
+}

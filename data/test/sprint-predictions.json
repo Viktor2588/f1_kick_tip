@@ -1,0 +1,21 @@
+{
+  "sprintPredictions": {
+    "2": {
+      "thomas": {
+        "winner": "norris",
+        "podium": ["norris", "verstappen", "leclerc"],
+        "submittedAt": "2026-03-13T10:00:00Z"
+      },
+      "julia": {
+        "winner": "verstappen",
+        "podium": ["verstappen", "leclerc", "norris"],
+        "submittedAt": "2026-03-13T12:00:00Z"
+      },
+      "viktor": {
+        "winner": "verstappen",
+        "podium": ["verstappen", "norris", "leclerc"],
+        "submittedAt": "2026-03-13T14:00:00Z"
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "results": {
+    "1": {
+      "winner": "verstappen",
+      "podium": ["verstappen", "norris", "hamilton"],
+      "pole": "verstappen",
+      "fastestLap": "norris",
+      "bestConstructor": "mclaren",
+      "topTen": ["verstappen", "norris", "hamilton", "leclerc", "piastri", "russell", "alonso", "sainz", "gasly", "hulkenberg"],
+      "enteredAt": "2026-03-08T07:30:00Z"
+    },
+    "2": {
+      "winner": "norris",
+      "podium": ["norris", "piastri", "leclerc"],
+      "pole": "norris",
+      "fastestLap": "piastri",
+      "bestConstructor": "mclaren",
+      "topTen": ["norris", "piastri", "leclerc", "verstappen", "hamilton", "russell", "alonso", "sainz", "gasly", "ocon"],
+      "enteredAt": "2026-03-15T09:30:00Z"
+    },
+    "3": {
+      "winner": "leclerc",
+      "podium": ["leclerc", "hamilton", "verstappen"],
+      "pole": "leclerc",
+      "fastestLap": "hamilton",
+      "bestConstructor": "ferrari",
+      "topTen": ["leclerc", "hamilton", "verstappen", "norris", "piastri", "russell", "alonso", "antonelli", "gasly", "sainz"],
+      "enteredAt": "2026-03-29T08:30:00Z"
+    },
+    "4": {
+      "winner": "hamilton",
+      "podium": ["hamilton", "leclerc", "norris"],
+      "pole": "hamilton",
+      "fastestLap": "norris",
+      "bestConstructor": "ferrari",
+      "topTen": ["hamilton", "leclerc", "norris", "verstappen", "piastri", "russell", "sainz", "alonso", "ocon", "gasly"],
+      "enteredAt": "2026-04-12T17:30:00Z"
+    }
+  }
+}

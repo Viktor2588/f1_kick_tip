@@ -7,8 +7,9 @@ const DATA_BASE = 'data/';
 /**
  * Load a JSON file from the data directory.
  */
-export async function loadJSON(filename) {
-  const resp = await fetch(`${DATA_BASE}${filename}`);
+export async function loadJSON(filename, basePath) {
+  const base = basePath || DATA_BASE;
+  const resp = await fetch(`${base}${filename}`);
   if (!resp.ok) throw new Error(`Fehler beim Laden von ${filename}: ${resp.status}`);
   return resp.json();
 }
@@ -16,15 +17,15 @@ export async function loadJSON(filename) {
 /**
  * Load all data files needed for the app.
  */
-export async function loadAllData() {
+export async function loadAllData(basePath) {
   const [season, predictions, sprintPredictions, seasonPredictions, results, sprintResults] =
     await Promise.all([
-      loadJSON('season.json'),
-      loadJSON('predictions.json'),
-      loadJSON('sprint-predictions.json'),
-      loadJSON('season-predictions.json'),
-      loadJSON('results.json'),
-      loadJSON('sprint-results.json'),
+      loadJSON('season.json', basePath),
+      loadJSON('predictions.json', basePath),
+      loadJSON('sprint-predictions.json', basePath),
+      loadJSON('season-predictions.json', basePath),
+      loadJSON('results.json', basePath),
+      loadJSON('sprint-results.json', basePath),
     ]);
   return { season, predictions, sprintPredictions, seasonPredictions, results, sprintResults };
 }

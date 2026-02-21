@@ -9,7 +9,8 @@ async function init() {
   const page = document.body.dataset.page;
 
   try {
-    const data = await loadAllData();
+    const basePath = document.body.dataset.basePath || undefined;
+    const data = await loadAllData(basePath);
 
     switch (page) {
       case 'dashboard':
