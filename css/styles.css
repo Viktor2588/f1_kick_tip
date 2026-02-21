@@ -712,6 +712,14 @@ h4 { font-size: 1rem; }
   font-size: 1.1rem;
 }
 
+.season-tip-value.masked-tip {
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.7;
+  letter-spacing: 0.05em;
+}
+
 /* --- Rules Page --- */
 .rules-section {
   margin-bottom: var(--space-xl);

@@ -232,20 +232,13 @@ function renderSeasonTips(season, seasonPredictions, results) {
     return;
   }
 
-  // Check if round 1 deadline has passed (only show after that)
+  // Check if round 1 deadline has passed (reveal tips only after that)
   const round1 = getRace(season, 1);
   const now = new Date();
-  if (round1 && now < new Date(round1.raceStartUTC)) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">\ud83d\udd12</div>
-        <div class="empty-state-text">Saison-Tipps werden nach Start von Runde 1 sichtbar</div>
-      </div>
-    `;
-    return;
-  }
+  const revealed = !round1 || now >= new Date(round1.raceStartUTC);
 
   container.innerHTML = `
+    ${!revealed ? '<div class="text-muted mb-md" style="font-size: var(--font-sm);">Tipps werden nach Start von Runde 1 aufgedeckt</div>' : ''}
     <div class="season-tip-grid">
       ${season.players.map(player => {
         const pred = preds[player.id];
@@ -253,6 +246,19 @@ function renderSeasonTips(season, seasonPredictions, results) {
           <div class="card season-tip-card" data-player="${player.id}">
             <div class="player-name">${player.emoji} ${player.name}</div>
             <div class="text-muted mt-md">Kein Tipp abgegeben</div>
+          </div>
+        `;
+        if (!revealed) return `
+          <div class="card season-tip-card" data-player="${player.id}">
+            <div class="player-name">${player.emoji} ${player.name}</div>
+            <div class="mt-md">
+              <div class="season-tip-label">Weltmeister (WDC)</div>
+              <div class="season-tip-value masked-tip">Abgegeben</div>
+            </div>
+            <div class="mt-md">
+              <div class="season-tip-label">Konstrukteurs-WM (WCC)</div>
+              <div class="season-tip-value masked-tip">Abgegeben</div>
+            </div>
           </div>
         `;
         return `
@@ -1230,18 +1236,40 @@ export function renderSeasonPage(data) {
   // Season tip form (only when open)
   html += '<div id="season-tip-form"></div>';
 
-  if (!locked && Object.keys(preds).length > 0) {
-    html += `<div class="empty-state"><div class="empty-state-text">\ud83d\udd12 Tipps werden nach Start von Runde 1 angezeigt</div></div>`;
-  } else if (Object.keys(preds).length === 0 && locked) {
+  if (Object.keys(preds).length === 0) {
     html += `<div class="empty-state"><div class="empty-state-icon">\ud83c\udfaf</div><div class="empty-state-text">Noch keine Saison-Tipps abgegeben</div></div>`;
-  } else if (locked) {
+  } else {
+    if (!locked) {
+      html += '<div class="text-muted mb-md" style="font-size: var(--font-sm);">Tipps werden nach Start von Runde 1 aufgedeckt</div>';
+    }
     html += '<div class="season-tip-grid">';
     for (const player of season.players) {
       const pred = preds[player.id];
-      html += `
-        <div class="card season-tip-card" data-player="${player.id}">
-          <div class="player-name" style="justify-content: center">${player.emoji} ${player.name}</div>
-          ${pred ? `
+      if (!pred) {
+        html += `
+          <div class="card season-tip-card" data-player="${player.id}">
+            <div class="player-name" style="justify-content: center">${player.emoji} ${player.name}</div>
+            <div class="text-muted mt-md">Kein Tipp</div>
+          </div>
+        `;
+      } else if (!locked) {
+        html += `
+          <div class="card season-tip-card" data-player="${player.id}">
+            <div class="player-name" style="justify-content: center">${player.emoji} ${player.name}</div>
+            <div class="mt-lg">
+              <div class="season-tip-label">Weltmeister (WDC)</div>
+              <div class="season-tip-value masked-tip">Abgegeben</div>
+            </div>
+            <div class="mt-md">
+              <div class="season-tip-label">Konstrukteurs-WM (WCC)</div>
+              <div class="season-tip-value masked-tip">Abgegeben</div>
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="card season-tip-card" data-player="${player.id}">
+            <div class="player-name" style="justify-content: center">${player.emoji} ${player.name}</div>
             <div class="mt-lg">
               <div class="season-tip-label">Weltmeister (WDC)</div>
               <div class="season-tip-value" style="color: ${teamColorForDriver(season, pred.wdc)}">
@@ -1252,9 +1280,9 @@ export function renderSeasonPage(data) {
               <div class="season-tip-label">Konstrukteurs-WM (WCC)</div>
               <div class="season-tip-value">${teamName(season, pred.wcc)}</div>
             </div>
-          ` : '<div class="text-muted mt-md">Kein Tipp</div>'}
-        </div>
-      `;
+          </div>
+        `;
+      }
     }
     html += '</div>';
   }

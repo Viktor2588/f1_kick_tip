@@ -35,9 +35,15 @@
     <section class="section">
       <h2 class="section-title">Leaderboard</h2>
       <div id="leaderboard" class="grid grid-3">
-        <div class="card loading" style="height: 180px;"></div>
-        <div class="card loading" style="height: 180px;"></div>
-        <div class="card loading" style="height: 180px;"></div>
+        <div class="card loading" style="height: 180px;">
+          <div class="loading-state"><div class="loading-spinner"></div></div>
+        </div>
+        <div class="card loading" style="height: 180px;">
+          <div class="loading-state"><div class="loading-spinner"></div></div>
+        </div>
+        <div class="card loading" style="height: 180px;">
+          <div class="loading-state"><div class="loading-spinner"></div></div>
+        </div>
       </div>
     </section>
 
@@ -45,10 +51,14 @@
     <section class="section">
       <div class="grid grid-2">
         <div class="card">
-          <div id="season-progress" class="loading">Lade...</div>
+          <div id="season-progress">
+            <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Fortschritt...</div></div>
+          </div>
         </div>
         <div class="card">
-          <div id="countdown" class="loading">Lade...</div>
+          <div id="countdown">
+            <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Countdown...</div></div>
+          </div>
         </div>
       </div>
     </section>
@@ -57,7 +67,9 @@
     <section class="section">
       <h2 class="section-title">Letzte Ergebnisse</h2>
       <div id="recent-results" class="recent-results">
-        <div class="card loading" style="height: 120px;"></div>
+        <div class="card loading" style="height: 120px;">
+          <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Ergebnisse...</div></div>
+        </div>
       </div>
     </section>
 
@@ -73,7 +85,9 @@
     <section class="section">
       <h2 class="section-title">Saison-Tipps</h2>
       <div id="season-tips">
-        <div class="card loading" style="height: 120px;"></div>
+        <div class="card loading" style="height: 120px;">
+          <div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Lade Saison-Tipps...</div></div>
+        </div>
       </div>
     </section>
 
