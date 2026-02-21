@@ -2,62 +2,34 @@
 // F1 Kick Tip 2026 – Neon Serverless Client
 // ========================================
 
-// ── Database Connection (Neon SQL-over-HTTP) ────────────
-const NEON_HOST = 'ep-summer-field-akisi0lv.c-3.us-west-2.aws.neon.tech';
-const CONNECTION_STRING = 'postgresql://neondb_owner:npg_I5ZK8GWBerMt@ep-summer-field-akisi0lv.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require';
+// ── Database Connection (Neon WebSocket) ─────────────────
+import { Pool, neonConfig } from 'https://esm.sh/@neondatabase/serverless';
+
+const DATABASE_URL = 'postgresql://neondb_owner:npg_I5ZK8GWBerMt@ep-summer-field-akisi0lv.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require';
+
+// Browser has native WebSocket – no polyfill needed
+neonConfig.webSocketConstructor = WebSocket;
+
+let _pool;
+function getPool() {
+  if (!_pool) _pool = new Pool({ connectionString: DATABASE_URL });
+  return _pool;
+}
 
 /**
- * Execute a parameterized SQL query via Neon HTTP API.
+ * Execute a parameterized SQL query via Neon WebSocket.
  * Returns rows as array of objects.
  */
 async function query(queryText, params = []) {
-  const resp = await fetch(`https://${NEON_HOST}/sql`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Neon-Connection-String': CONNECTION_STRING,
-    },
-    body: JSON.stringify([{ query: queryText, params }]),
-  });
-
-  if (!resp.ok) {
-    const errText = await resp.text().catch(() => '');
-    throw new Error(`DB-Fehler ${resp.status}: ${errText}`);
-  }
-
-  const data = await resp.json();
-  const result = data.results[0];
-  if (result.error) throw new Error(result.error.message || 'SQL-Fehler');
-
-  const fields = result.fields.map(f => f.name);
-  return result.rows.map(row => {
-    const obj = {};
-    fields.forEach((name, i) => { obj[name] = row[i]; });
-    return obj;
-  });
+  const { rows } = await getPool().query(queryText, params);
+  return rows;
 }
 
 /**
  * Execute SQL without returning rows (INSERT/UPDATE/DELETE).
  */
 async function execute(queryText, params = []) {
-  const resp = await fetch(`https://${NEON_HOST}/sql`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Neon-Connection-String': CONNECTION_STRING,
-    },
-    body: JSON.stringify([{ query: queryText, params }]),
-  });
-
-  if (!resp.ok) {
-    const errText = await resp.text().catch(() => '');
-    throw new Error(`DB-Fehler ${resp.status}: ${errText}`);
-  }
-
-  const data = await resp.json();
-  const result = data.results[0];
-  if (result.error) throw new Error(result.error.message || 'SQL-Fehler');
+  await getPool().query(queryText, params);
 }
 
 // ── Player Identity (localStorage-based, like when2meet) ─
