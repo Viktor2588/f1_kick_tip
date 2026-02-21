@@ -1257,38 +1257,57 @@ function showTipToast(message, type = 'success') {
 // ---- Season Tips (saison.html) ----
 
 export function renderSeasonPage(data) {
-  const { season, seasonPredictions, results } = data;
+  const { season, predictions, sprintPredictions, seasonPredictions, results, sprintResults } = data;
   const container = document.getElementById('season-content');
   if (!container) return;
 
+  const nextRace = getNextRace(season, results);
   const preds = seasonPredictions.seasonPredictions || {};
   const round1 = getRace(season, 1);
   const now = new Date();
-  const locked = round1 && now >= new Date(round1.raceStartUTC);
-
-  let statusHtml;
-  if (!locked) {
-    statusHtml = '<span class="status-badge status-open">Offen \u2013 Tipps bis Runde 1 möglich</span>';
-  } else {
-    statusHtml = '<span class="status-badge status-locked">Gesperrt</span>';
-  }
+  const seasonLocked = round1 && now >= new Date(round1.raceStartUTC);
 
   let html = `
     <div class="race-header">
-      <h1>Saison-Tipps 2026</h1>
-      <div class="race-info">Weltmeister (WDC) & Konstrukteurs-WM (WCC)</div>
-      <div class="race-status mt-md">${statusHtml}</div>
+      <h1>Tipps 2026</h1>
+      <div class="race-info">Renn-, Sprint- & Saison-Tipps abgeben</div>
     </div>
   `;
 
-  // Season tip form (only when open)
-  html += '<div id="season-tip-form"></div>';
+  // Next race tip form
+  if (nextRace) {
+    html += `
+      <section class="section">
+        <h2 class="section-title">${countryFlag(nextRace.countryCode)} Runde ${nextRace.round} – ${nextRace.name}</h2>
+        <div id="tip-form-section"></div>
+      </section>
+    `;
+    if (nextRace.sprint) {
+      html += `
+        <section class="section">
+          <div id="sprint-tip-form-section"></div>
+        </section>
+      `;
+    }
+  }
 
+  // Season tip form
+  html += `
+    <section class="section">
+      <h2 class="section-title">Saison-Tipps (WDC & WCC)
+        ${seasonLocked ? '<span class="status-badge status-locked" style="margin-left: var(--space-sm); font-size: 0.7rem;">Gesperrt</span>' : '<span class="status-badge status-open" style="margin-left: var(--space-sm); font-size: 0.7rem;">Offen</span>'}
+      </h2>
+      <div id="season-tip-form"></div>
+    </section>
+  `;
+
+  // Season tips display
+  html += '<section class="section">';
   if (Object.keys(preds).length === 0) {
     html += `<div class="empty-state"><div class="empty-state-icon">\ud83c\udfaf</div><div class="empty-state-text">Noch keine Saison-Tipps abgegeben</div></div>`;
   } else {
-    if (!locked) {
-      html += '<div class="text-muted mb-md" style="font-size: var(--font-sm);">Tipps werden nach Start von Runde 1 aufgedeckt</div>';
+    if (!seasonLocked) {
+      html += '<div class="text-muted mb-md" style="font-size: var(--font-sm);">Saison-Tipps werden nach Start von Runde 1 aufgedeckt</div>';
     }
     html += '<div class="season-tip-grid">';
     for (const player of season.players) {
@@ -1300,7 +1319,7 @@ export function renderSeasonPage(data) {
             <div class="text-muted mt-md">Kein Tipp</div>
           </div>
         `;
-      } else if (!locked) {
+      } else if (!seasonLocked) {
         html += `
           <div class="card season-tip-card" data-player="${player.id}">
             <div class="player-name" style="justify-content: center">${player.emoji} ${player.name}</div>
@@ -1334,11 +1353,18 @@ export function renderSeasonPage(data) {
     }
     html += '</div>';
   }
+  html += '</section>';
 
   container.innerHTML = html;
 
-  // Render the season tip form if deadline is open
-  if (!locked) {
+  // Render tip forms into the containers
+  if (nextRace) {
+    renderTipForm(season, nextRace, predictions, results, data);
+    if (nextRace.sprint) {
+      renderSprintTipForm(season, nextRace, sprintPredictions, sprintResults, data);
+    }
+  }
+  if (!seasonLocked) {
     renderSeasonTipForm(season, seasonPredictions);
   }
 }
