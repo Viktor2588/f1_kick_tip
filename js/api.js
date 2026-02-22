@@ -5,7 +5,7 @@
 // ── Database Connection (Neon HTTP) ──────────────────────
 import { neon } from 'https://esm.sh/@neondatabase/serverless';
 
-const DATABASE_URL = 'postgresql://neondb_owner:npg_I5ZK8GWBerMt@ep-summer-field-akisi0lv-pooler.us-west-2.aws.neon.tech/neondb?sslmode=require';
+const DATABASE_URL = 'postgresql://neondb_owner:npg_I5ZK8GWBerMt@ep-summer-field-akisi0lv.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require';
 
 const sql = neon(DATABASE_URL);
 
