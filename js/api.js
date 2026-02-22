@@ -57,116 +57,86 @@ export function getPlayerIdFromSession() {
 
 // ── Read Functions (DB → App Format) ─────────────────────
 
-export async function fetchPredictions() {
+/**
+ * Fetch ALL data in a single DB connection.
+ * Acquires one client from the pool, runs all 5 queries over the same
+ * WebSocket, then releases. Avoids 4 extra cold-start roundtrips.
+ */
+export async function fetchAllData() {
+  const client = await getPool().connect();
   try {
-    const rows = await query('SELECT * FROM race_predictions');
+    const [rpRes, spRes, seRes, rrRes, srRes] = await Promise.all([
+      client.query('SELECT * FROM race_predictions'),
+      client.query('SELECT * FROM sprint_predictions'),
+      client.query('SELECT * FROM season_predictions'),
+      client.query('SELECT * FROM race_results'),
+      client.query('SELECT * FROM sprint_results'),
+    ]);
+
     const predictions = {};
-
-    for (const row of rows) {
-      const roundStr = String(row.round);
-      if (!predictions[roundStr]) predictions[roundStr] = {};
-      predictions[roundStr][row.player_id] = {
-        winner: row.winner,
-        podium: [row.podium_p1, row.podium_p2, row.podium_p3],
-        pole: row.pole,
-        fastestLap: row.fastest_lap,
-        bestConstructor: row.best_constructor,
-        submittedAt: row.submitted_at,
+    for (const row of rpRes.rows) {
+      const r = String(row.round);
+      if (!predictions[r]) predictions[r] = {};
+      predictions[r][row.player_id] = {
+        winner: row.winner, podium: [row.podium_p1, row.podium_p2, row.podium_p3],
+        pole: row.pole, fastestLap: row.fastest_lap,
+        bestConstructor: row.best_constructor, submittedAt: row.submitted_at,
       };
     }
 
-    return { predictions };
-  } catch (e) {
-    console.error('fetchPredictions:', e);
-    return { predictions: {} };
-  }
-}
-
-export async function fetchSprintPredictions() {
-  try {
-    const rows = await query('SELECT * FROM sprint_predictions');
     const sprintPredictions = {};
-
-    for (const row of rows) {
-      const roundStr = String(row.round);
-      if (!sprintPredictions[roundStr]) sprintPredictions[roundStr] = {};
-      sprintPredictions[roundStr][row.player_id] = {
-        winner: row.winner,
-        podium: [row.podium_p1, row.podium_p2, row.podium_p3],
+    for (const row of spRes.rows) {
+      const r = String(row.round);
+      if (!sprintPredictions[r]) sprintPredictions[r] = {};
+      sprintPredictions[r][row.player_id] = {
+        winner: row.winner, podium: [row.podium_p1, row.podium_p2, row.podium_p3],
         submittedAt: row.submitted_at,
       };
     }
 
-    return { sprintPredictions };
-  } catch (e) {
-    console.error('fetchSprintPredictions:', e);
-    return { sprintPredictions: {} };
-  }
-}
-
-export async function fetchSeasonPredictions() {
-  try {
-    const rows = await query('SELECT * FROM season_predictions');
     const seasonPredictions = {};
-
-    for (const row of rows) {
+    for (const row of seRes.rows) {
       seasonPredictions[row.player_id] = {
-        wdc: row.wdc,
-        wcc: row.wcc,
-        submittedAt: row.submitted_at,
+        wdc: row.wdc, wcc: row.wcc, submittedAt: row.submitted_at,
       };
     }
 
-    return { seasonPredictions };
-  } catch (e) {
-    console.error('fetchSeasonPredictions:', e);
-    return { seasonPredictions: {} };
-  }
-}
-
-export async function fetchResults() {
-  try {
-    const rows = await query('SELECT * FROM race_results');
     const results = {};
-
-    for (const row of rows) {
-      const roundStr = String(row.round);
-      results[roundStr] = {
-        winner: row.winner,
-        podium: [row.podium_p1, row.podium_p2, row.podium_p3],
-        pole: row.pole,
-        fastestLap: row.fastest_lap,
-        bestConstructor: row.best_constructor,
-        topTen: row.top_ten || undefined,
+    for (const row of rrRes.rows) {
+      results[String(row.round)] = {
+        winner: row.winner, podium: [row.podium_p1, row.podium_p2, row.podium_p3],
+        pole: row.pole, fastestLap: row.fastest_lap,
+        bestConstructor: row.best_constructor, topTen: row.top_ten || undefined,
         enteredAt: row.entered_at,
       };
     }
 
-    return { results };
-  } catch (e) {
-    console.error('fetchResults:', e);
-    return { results: {} };
-  }
-}
-
-export async function fetchSprintResults() {
-  try {
-    const rows = await query('SELECT * FROM sprint_results');
     const sprintResults = {};
-
-    for (const row of rows) {
-      const roundStr = String(row.round);
-      sprintResults[roundStr] = {
-        winner: row.winner,
-        podium: [row.podium_p1, row.podium_p2, row.podium_p3],
+    for (const row of srRes.rows) {
+      sprintResults[String(row.round)] = {
+        winner: row.winner, podium: [row.podium_p1, row.podium_p2, row.podium_p3],
         enteredAt: row.entered_at,
       };
     }
 
-    return { sprintResults };
+    return {
+      predictions: { predictions },
+      sprintPredictions: { sprintPredictions },
+      seasonPredictions: { seasonPredictions },
+      results: { results },
+      sprintResults: { sprintResults },
+    };
   } catch (e) {
-    console.error('fetchSprintResults:', e);
-    return { sprintResults: {} };
+    console.error('fetchAllData:', e);
+    return {
+      predictions: { predictions: {} },
+      sprintPredictions: { sprintPredictions: {} },
+      seasonPredictions: { seasonPredictions: {} },
+      results: { results: {} },
+      sprintResults: { sprintResults: {} },
+    };
+  } finally {
+    client.release();
   }
 }
 

@@ -2,10 +2,7 @@
 // F1 Kick Tip 2026 – Utility Functions
 // ========================================
 
-import {
-  fetchPredictions, fetchSprintPredictions, fetchSeasonPredictions,
-  fetchResults, fetchSprintResults,
-} from './api.js';
+import { fetchAllData } from './api.js';
 
 const DATA_BASE = 'data/';
 
@@ -22,11 +19,11 @@ export async function loadJSON(filename, basePath) {
 /**
  * Load all data files needed for the app.
  * If basePath is set (test mode) → load from JSON files.
- * If not set (production) → season.json is static, rest from Neon Data API.
+ * If not set (production) → season.json is static, DB data via single connection.
  */
 export async function loadAllData(basePath) {
   if (basePath) {
-    // Test mode: load all from JSON files (unchanged)
+    // Test mode: load all from JSON files
     const [season, predictions, sprintPredictions, seasonPredictions, results, sprintResults] =
       await Promise.all([
         loadJSON('season.json', basePath),
@@ -39,17 +36,12 @@ export async function loadAllData(basePath) {
     return { season, predictions, sprintPredictions, seasonPredictions, results, sprintResults };
   }
 
-  // Production: season.json is static, rest from Neon Data API
-  const [season, predictions, sprintPredictions, seasonPredictions, results, sprintResults] =
-    await Promise.all([
-      loadJSON('season.json'),
-      fetchPredictions(),
-      fetchSprintPredictions(),
-      fetchSeasonPredictions(),
-      fetchResults(),
-      fetchSprintResults(),
-    ]);
-  return { season, predictions, sprintPredictions, seasonPredictions, results, sprintResults };
+  // Production: season.json (static) + all DB data in one connection
+  const [season, dbData] = await Promise.all([
+    loadJSON('season.json'),
+    fetchAllData(),
+  ]);
+  return { season, ...dbData };
 }
 
 /**
