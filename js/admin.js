@@ -6,7 +6,7 @@ import { loadAllData, countryFlag, formatDate, driverName, teamName } from './ut
 import {
   submitRaceResult, submitSprintResult,
   submitRacePrediction, submitSprintPrediction, submitSeasonPrediction,
-  deleteRaceResult, deleteSprintResult,
+  deleteRaceResult, deleteSprintResult, deleteSeasonPrediction,
 } from './api.js';
 
 // ── State ──────────────────────────────────────────────
@@ -746,7 +746,18 @@ async function saveSeasonPredictions() {
 
     const wdc = fd.get('wdc');
     const wcc = fd.get('wcc');
-    if (!wdc && !wcc) continue;
+
+    if (!wdc && !wcc) {
+      // Both empty → delete existing prediction
+      if (state.seasonPredictions.seasonPredictions[playerId]) {
+        promises.push(
+          deleteSeasonPrediction(playerId).then(() => {
+            delete state.seasonPredictions.seasonPredictions[playerId];
+          })
+        );
+      }
+      continue;
+    }
 
     const data = { wdc: wdc || '', wcc: wcc || '' };
 

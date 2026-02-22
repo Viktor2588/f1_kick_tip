@@ -208,6 +208,10 @@ export async function submitSeasonPrediction(playerId, data) {
   );
 }
 
+export async function deleteSeasonPrediction(playerId) {
+  await execute(`DELETE FROM season_predictions WHERE player_id = $1`, [playerId]);
+}
+
 export async function submitRaceResult(round, data) {
   await execute(
     `INSERT INTO race_results (round, winner, podium_p1, podium_p2, podium_p3, pole, fastest_lap, best_constructor, top_ten, entered_at)
