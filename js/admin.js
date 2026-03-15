@@ -135,7 +135,7 @@ function podiumInputsHTML(prefix, podium) {
   const p = podium || ['', '', ''];
   return `
     <div class="form-group">
-      <label class="form-label">Podium P1</label>
+      <label class="form-label">Podium P1 (Sieger)</label>
       ${driverSelectHTML(`${prefix}_podium_0`, p[0])}
     </div>
     <div class="form-group">
@@ -195,10 +195,6 @@ function renderResultsForm(round) {
         ${countryFlag(race.countryCode)} ${race.name} – Ergebnis
       </h3>
       <form id="result-form" class="admin-form-grid">
-        <div class="form-group">
-          <label class="form-label">Sieger</label>
-          ${driverSelectHTML('winner', result.winner)}
-        </div>
         ${podiumInputsHTML('result', result.podium)}
         <div class="form-group">
           <label class="form-label">Pole Position</label>
@@ -258,11 +254,11 @@ async function saveResult(round) {
   const fd = new FormData(form);
   const roundStr = String(round);
 
-  const winner = fd.get('winner');
-  if (!winner) { showToast('Bitte Sieger auswählen', 'error'); return; }
+  const winner = fd.get('result_podium_0');
+  if (!winner) { showToast('Bitte Podium P1 auswählen', 'error'); return; }
 
   const podium = [
-    winner,  // Ensure podium[0] is always the winner
+    winner,
     fd.get('result_podium_1'),
     fd.get('result_podium_2'),
   ];
@@ -332,10 +328,6 @@ function renderPredictionsForm(round) {
           ${player.emoji} ${player.name}
         </h3>
         <form class="admin-form-grid prediction-form" data-player="${player.id}">
-          <div class="form-group">
-            <label class="form-label">Sieger</label>
-            ${driverSelectHTML(`winner`, pred.winner)}
-          </div>
           ${podiumInputsHTML(player.id, pred.podium)}
           <div class="form-group">
             <label class="form-label">Pole Position</label>
@@ -383,13 +375,13 @@ async function savePredictions(round) {
     const playerId = form.dataset.player;
     const fd = new FormData(form);
 
-    const winner = fd.get('winner');
+    const winner = fd.get(`${playerId}_podium_0`);
     if (!winner) continue;
 
     const data = {
       winner,
       podium: [
-        fd.get(`${playerId}_podium_0`) || '',
+        winner,
         fd.get(`${playerId}_podium_1`) || '',
         fd.get(`${playerId}_podium_2`) || '',
       ],
@@ -459,10 +451,6 @@ function renderSprintResultsForm(round) {
         <span class="sprint-badge">Sprint</span>
       </h3>
       <form id="sprint-result-form" class="admin-form-grid">
-        <div class="form-group">
-          <label class="form-label">Sieger</label>
-          ${driverSelectHTML('winner', result.winner)}
-        </div>
         ${podiumInputsHTML('sprint', result.podium)}
         <div class="form-group">
           <label class="form-label">Eingabe-Zeitpunkt</label>
@@ -500,13 +488,13 @@ async function saveSprintResult(round) {
   const fd = new FormData(form);
   const roundStr = String(round);
 
-  const winner = fd.get('winner');
-  if (!winner) { showToast('Bitte Sieger auswählen', 'error'); return; }
+  const winner = fd.get('sprint_podium_0');
+  if (!winner) { showToast('Bitte Podium P1 auswählen', 'error'); return; }
 
   const data = {
     winner,
     podium: [
-      winner,  // Ensure podium[0] is always the winner
+      winner,
       fd.get('sprint_podium_1') || '',
       fd.get('sprint_podium_2') || '',
     ],
@@ -567,10 +555,6 @@ function renderSprintPredictionsForm(round) {
           <span class="sprint-badge">Sprint</span>
         </h3>
         <form class="admin-form-grid sprint-prediction-form" data-player="${player.id}">
-          <div class="form-group">
-            <label class="form-label">Sieger</label>
-            ${driverSelectHTML('winner', pred.winner)}
-          </div>
           ${podiumInputsHTML(`sp_${player.id}`, pred.podium)}
           <div class="form-group">
             <label class="form-label">Abgabe-Zeitpunkt</label>
@@ -606,13 +590,13 @@ async function saveSprintPredictions(round) {
     const playerId = form.dataset.player;
     const fd = new FormData(form);
 
-    const winner = fd.get('winner');
+    const winner = fd.get(`sp_${playerId}_podium_0`);
     if (!winner) continue;
 
     const data = {
       winner,
       podium: [
-        fd.get(`sp_${playerId}_podium_0`) || '',
+        winner,
         fd.get(`sp_${playerId}_podium_1`) || '',
         fd.get(`sp_${playerId}_podium_2`) || '',
       ],
