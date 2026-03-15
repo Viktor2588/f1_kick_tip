@@ -482,6 +482,10 @@ function renderRacePredictions(season, race, predictions, results) {
     return;
   }
 
+  // Check if tips should be revealed (only after deadline has passed)
+  const deadlineStatus = getDeadlineStatus(race, results);
+  const revealed = deadlineStatus !== 'open';
+
   const categories = [
     { key: 'winner', label: 'Podium P1 (Rennsieger)', format: id => driverLastName(season, id) },
     { key: 'podium-2', label: 'Podium P2', format: (_, pred) => pred?.podium?.[1] ? driverLastName(season, pred.podium[1]) : '-' },
@@ -491,7 +495,12 @@ function renderRacePredictions(season, race, predictions, results) {
     { key: 'bestConstructor', label: 'Bester Konstrukteur', format: id => teamName(season, id) },
   ];
 
-  let html = `<table class="comparison-table">
+  let html = '';
+  if (!revealed) {
+    html += '<div class="text-muted mb-md" style="font-size: var(--font-sm);">Tipps werden nach Rennstart aufgedeckt</div>';
+  }
+
+  html += `<table class="comparison-table">
     <thead><tr>
       <th>Kategorie</th>
       ${players.map(p => `<th data-player="${p.id}">${p.emoji} ${p.name}</th>`).join('')}
@@ -509,29 +518,34 @@ function renderRacePredictions(season, race, predictions, results) {
       let icon = '';
 
       if (pred) {
-        const late = isLate(pred.submittedAt, race.raceStartUTC);
-
-        if (cat.key === 'podium-2' || cat.key === 'podium-3') {
-          value = cat.format(null, pred);
+        if (!revealed) {
+          // Hide tips until deadline passes
+          value = '<span class="masked-tip">Abgegeben</span>';
         } else {
-          value = pred[cat.key] ? cat.format(pred[cat.key]) : '-';
-        }
+          const late = isLate(pred.submittedAt, race.raceStartUTC);
 
-        if (late) {
-          cssClass = 'result-wrong';
-          icon = ' <span class="late-badge">Verspätet</span>';
-        } else if (result) {
-          const isCorrect = checkCategoryCorrect(cat.key, pred, result);
-          const isPartial = checkCategoryPartial(cat.key, pred, result);
-          if (isCorrect) {
-            cssClass = 'result-correct';
-            icon = ' \u2705';
-          } else if (isPartial) {
-            cssClass = 'result-partial';
-            icon = ' \ud83d\udfe1';
+          if (cat.key === 'podium-2' || cat.key === 'podium-3') {
+            value = cat.format(null, pred);
           } else {
+            value = pred[cat.key] ? cat.format(pred[cat.key]) : '-';
+          }
+
+          if (late) {
             cssClass = 'result-wrong';
-            icon = ' \u274c';
+            icon = ' <span class="late-badge">Verspätet</span>';
+          } else if (result) {
+            const isCorrect = checkCategoryCorrect(cat.key, pred, result);
+            const isPartial = checkCategoryPartial(cat.key, pred, result);
+            if (isCorrect) {
+              cssClass = 'result-correct';
+              icon = ' \u2705';
+            } else if (isPartial) {
+              cssClass = 'result-partial';
+              icon = ' \ud83d\udfe1';
+            } else {
+              cssClass = 'result-wrong';
+              icon = ' \u274c';
+            }
           }
         }
       }
@@ -596,13 +610,22 @@ function renderSprintPredictions(season, race, sprintPredictions, sprintResults)
     return;
   }
 
+  // Check if tips should be revealed (only after sprint deadline has passed)
+  const sprintDeadlineStatus = getSprintDeadlineStatus(race, sprintResults);
+  const revealed = sprintDeadlineStatus !== 'open';
+
   const categories = [
     { key: 'winner', label: 'Sprint P1 (Sieger)', format: id => driverLastName(season, id) },
     { key: 'podium-2', label: 'Sprint P2', format: (_, pred) => pred?.podium?.[1] ? driverLastName(season, pred.podium[1]) : '-' },
     { key: 'podium-3', label: 'Sprint P3', format: (_, pred) => pred?.podium?.[2] ? driverLastName(season, pred.podium[2]) : '-' },
   ];
 
-  let html = `<h3 class="section-title">Sprint-Tipps</h3>
+  let html = `<h3 class="section-title">Sprint-Tipps</h3>`;
+  if (!revealed) {
+    html += '<div class="text-muted mb-md" style="font-size: var(--font-sm);">Tipps werden nach Sprint-Start aufgedeckt</div>';
+  }
+
+  html += `
     <table class="comparison-table">
     <thead><tr>
       <th>Kategorie</th>
@@ -621,30 +644,35 @@ function renderSprintPredictions(season, race, sprintPredictions, sprintResults)
       let icon = '';
 
       if (pred) {
-        const late = isLate(pred.submittedAt, race.sprintStartUTC);
-
-        if (cat.key.startsWith('podium-')) {
-          value = cat.format(null, pred);
+        if (!revealed) {
+          // Hide tips until sprint deadline passes
+          value = '<span class="masked-tip">Abgegeben</span>';
         } else {
-          value = pred[cat.key] ? cat.format(pred[cat.key]) : '-';
-        }
+          const late = isLate(pred.submittedAt, race.sprintStartUTC);
 
-        if (late) {
-          cssClass = 'result-wrong';
-          icon = ' <span class="late-badge">Verspätet</span>';
-        } else if (result) {
-          const idx = cat.key === 'winner' ? 0 : parseInt(cat.key.split('-')[1]) - 1;
-          const predVal = cat.key === 'winner' ? pred.winner : pred.podium?.[idx];
-          const resVal = cat.key === 'winner' ? result.winner : result.podium?.[idx];
-          if (predVal === resVal) {
-            cssClass = 'result-correct';
-            icon = ' \u2705';
-          } else if (predVal && result.podium?.includes(predVal)) {
-            cssClass = 'result-partial';
-            icon = ' \ud83d\udfe1';
+          if (cat.key.startsWith('podium-')) {
+            value = cat.format(null, pred);
           } else {
+            value = pred[cat.key] ? cat.format(pred[cat.key]) : '-';
+          }
+
+          if (late) {
             cssClass = 'result-wrong';
-            icon = ' \u274c';
+            icon = ' <span class="late-badge">Verspätet</span>';
+          } else if (result) {
+            const idx = cat.key === 'winner' ? 0 : parseInt(cat.key.split('-')[1]) - 1;
+            const predVal = cat.key === 'winner' ? pred.winner : pred.podium?.[idx];
+            const resVal = cat.key === 'winner' ? result.winner : result.podium?.[idx];
+            if (predVal === resVal) {
+              cssClass = 'result-correct';
+              icon = ' \u2705';
+            } else if (predVal && result.podium?.includes(predVal)) {
+              cssClass = 'result-partial';
+              icon = ' \ud83d\udfe1';
+            } else {
+              cssClass = 'result-wrong';
+              icon = ' \u274c';
+            }
           }
         }
       }
