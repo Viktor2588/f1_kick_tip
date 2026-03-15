@@ -262,7 +262,7 @@ async function saveResult(round) {
   if (!winner) { showToast('Bitte Sieger auswählen', 'error'); return; }
 
   const podium = [
-    fd.get('result_podium_0'),
+    winner,  // Ensure podium[0] is always the winner
     fd.get('result_podium_1'),
     fd.get('result_podium_2'),
   ];
@@ -506,7 +506,7 @@ async function saveSprintResult(round) {
   const data = {
     winner,
     podium: [
-      fd.get('sprint_podium_0') || '',
+      winner,  // Ensure podium[0] is always the winner
       fd.get('sprint_podium_1') || '',
       fd.get('sprint_podium_2') || '',
     ],

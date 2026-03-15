@@ -483,7 +483,7 @@ function renderRacePredictions(season, race, predictions, results) {
   }
 
   const categories = [
-    { key: 'winner', label: 'Rennsieger (= P1)', format: id => driverLastName(season, id) },
+    { key: 'winner', label: 'Podium P1 (Rennsieger)', format: id => driverLastName(season, id) },
     { key: 'podium-2', label: 'Podium P2', format: (_, pred) => pred?.podium?.[1] ? driverLastName(season, pred.podium[1]) : '-' },
     { key: 'podium-3', label: 'Podium P3', format: (_, pred) => pred?.podium?.[2] ? driverLastName(season, pred.podium[2]) : '-' },
     { key: 'pole', label: 'Pole Position', format: id => driverLastName(season, id) },
@@ -597,7 +597,7 @@ function renderSprintPredictions(season, race, sprintPredictions, sprintResults)
   }
 
   const categories = [
-    { key: 'winner', label: 'Sprint-Sieger (= P1)', format: id => driverLastName(season, id) },
+    { key: 'winner', label: 'Sprint P1 (Sieger)', format: id => driverLastName(season, id) },
     { key: 'podium-2', label: 'Sprint P2', format: (_, pred) => pred?.podium?.[1] ? driverLastName(season, pred.podium[1]) : '-' },
     { key: 'podium-3', label: 'Sprint P3', format: (_, pred) => pred?.podium?.[2] ? driverLastName(season, pred.podium[2]) : '-' },
   ];
@@ -793,13 +793,13 @@ function tipLabel(text, tooltip) {
 
 // Tooltip texts for each tip category
 const TIP_HINTS = {
-  winner: '3 Punkte für den richtigen Rennsieger (= Podium P1).',
+  podium0: '3 Punkte für den richtigen Rennsieger (= Podium P1).',
   podium1: '2 Punkte bei richtiger Position. 1 Punkt wenn der Fahrer auf dem Podium landet, aber auf einer anderen Position.',
   podium2: '2 Punkte bei richtiger Position. 1 Punkt wenn der Fahrer auf dem Podium landet, aber auf einer anderen Position.',
   pole: '3 Punkte wenn du den Pole-Sitter richtig tippst. Das ist der Fahrer, der im Qualifying die schnellste Runde fährt.',
   fastestLap: '3 Punkte wenn du tippst, wer die schnellste Runde im Rennen fährt.',
   bestConstructor: '3 Punkte wenn du tippst, welches Team die meisten Punkte in diesem Rennen holt.',
-  sprintWinner: '3 Punkte für den richtigen Sprint-Sieger. Zählt automatisch auch als Sprint P1.',
+  sprintPodium0: '3 Punkte für den richtigen Sprint-Sieger (= Sprint P1).',
   sprintP1: '1 Punkt bei richtiger Position. 1 Punkt Bonus wenn auf dem Podium aber falsche Position.',
   sprintP2: '1 Punkt bei richtiger Position. 1 Punkt Bonus wenn auf dem Podium aber falsche Position.',
   wdc: '20 Punkte am Saisonende, wenn du den Fahrer-Weltmeister richtig tippst. Muss vor Runde 1 abgegeben werden.',
@@ -1069,8 +1069,8 @@ function renderTipForm(season, race, predictions, results, data) {
       </div>
       <div id="race-tip-form" class="admin-form-grid">
         <div class="form-group">
-          <label class="form-label">${tipLabel('Rennsieger (= P1)', TIP_HINTS.winner)}</label>
-          ${driverSearchSelect(season, 'winner', existing?.winner, true, 'podium')}
+          <label class="form-label">${tipLabel('Podium P1 (Rennsieger)', TIP_HINTS.podium0)}</label>
+          ${driverSearchSelect(season, 'podium_0', existing?.podium?.[0], true, 'podium')}
         </div>
         <div class="form-group">
           <label class="form-label">${tipLabel('Podium P2', TIP_HINTS.podium1)}</label>
@@ -1106,13 +1106,12 @@ function renderTipForm(season, race, predictions, results, data) {
     const vals = getSearchSelectValues(formEl);
     const submitBtn = container.querySelector('#race-tip-submit');
 
-    if (!vals.winner) {
-      showTipToast('Bitte Rennsieger wählen', 'error');
+    if (!vals.podium_0) {
+      showTipToast('Bitte Podium P1 wählen', 'error');
       return;
     }
 
-    // Winner = P1 auto-sync
-    const podium = [vals.winner, vals.podium_1, vals.podium_2];
+    const podium = [vals.podium_0, vals.podium_1, vals.podium_2];
 
     // Duplicate validation for podium
     const podiumSet = podium.filter(Boolean);
@@ -1126,7 +1125,7 @@ function renderTipForm(season, race, predictions, results, data) {
 
     try {
       await submitRacePrediction(race.round, playerId, {
-        winner: vals.winner,
+        winner: vals.podium_0,
         podium,
         pole: vals.pole || '',
         fastestLap: vals.fastestLap || '',
@@ -1183,8 +1182,8 @@ function renderSprintTipForm(season, race, sprintPredictions, sprintResults, dat
       </div>
       <div id="sprint-tip-form" class="admin-form-grid">
         <div class="form-group">
-          <label class="form-label">${tipLabel('Sprint-Sieger (= P1)', TIP_HINTS.sprintWinner)}</label>
-          ${driverSearchSelect(season, 'winner', existing?.winner, true, 'sprint-podium')}
+          <label class="form-label">${tipLabel('Sprint P1 (Sieger)', TIP_HINTS.sprintPodium0)}</label>
+          ${driverSearchSelect(season, 'podium_0', existing?.podium?.[0], true, 'sprint-podium')}
         </div>
         <div class="form-group">
           <label class="form-label">${tipLabel('Sprint P2', TIP_HINTS.sprintP1)}</label>
@@ -1208,13 +1207,12 @@ function renderSprintTipForm(season, race, sprintPredictions, sprintResults, dat
     const vals = getSearchSelectValues(sprintFormEl);
     const submitBtn = container.querySelector('#sprint-tip-submit');
 
-    if (!vals.winner) {
-      showTipToast('Bitte Sprint-Sieger wählen', 'error');
+    if (!vals.podium_0) {
+      showTipToast('Bitte Sprint P1 wählen', 'error');
       return;
     }
 
-    // Winner = P1 auto-sync
-    const podium = [vals.winner, vals.podium_1, vals.podium_2];
+    const podium = [vals.podium_0, vals.podium_1, vals.podium_2];
 
     // Duplicate validation for podium
     const podiumSet = podium.filter(Boolean);
@@ -1228,7 +1226,7 @@ function renderSprintTipForm(season, race, sprintPredictions, sprintResults, dat
 
     try {
       await submitSprintPrediction(race.round, playerId, {
-        winner: vals.winner,
+        winner: vals.podium_0,
         podium,
       });
       showTipToast('Sprint-Tipp gespeichert!');
