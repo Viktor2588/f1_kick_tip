@@ -209,11 +209,6 @@ function renderResultsForm(round) {
           ${teamSelectHTML('bestConstructor', result.bestConstructor)}
         </div>
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label class="form-label">Eingabe-Zeitpunkt</label>
-          <input type="datetime-local" class="form-input" name="enteredAt"
-                 value="${toDatetimeLocal(result.enteredAt)}">
-        </div>
-        <div class="form-group" style="grid-column: 1 / -1;">
           <details>
             <summary style="cursor:pointer; color: var(--text-secondary); font-size: 0.9rem;">
               Top 10 (optional)
@@ -276,7 +271,7 @@ async function saveResult(round) {
     fastestLap: fd.get('fastestLap') || '',
     bestConstructor: fd.get('bestConstructor') || '',
     topTen: topTen.length > 0 ? topTen : undefined,
-    enteredAt: toUTC(fd.get('enteredAt')),
+    enteredAt: new Date().toISOString(),
   };
 
   try {
@@ -452,11 +447,6 @@ function renderSprintResultsForm(round) {
       </h3>
       <form id="sprint-result-form" class="admin-form-grid">
         ${podiumInputsHTML('sprint', result.podium)}
-        <div class="form-group">
-          <label class="form-label">Eingabe-Zeitpunkt</label>
-          <input type="datetime-local" class="form-input" name="enteredAt"
-                 value="${toDatetimeLocal(result.enteredAt)}">
-        </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">Sprint-Ergebnis speichern</button>
           <button type="button" class="btn btn-danger" id="clear-sprint-result">Löschen</button>
