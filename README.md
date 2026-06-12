@@ -98,21 +98,24 @@ Verspätete Tipps (`submittedAt` nach Deadline) = **0 Punkte**.
 
 ## Punktesystem
 
-### Hauptrennen (max. 26 Punkte)
+### Hauptrennen (max. 21 Punkte)
 
 | Kategorie | Punkte |
 |---|---|
-| Rennsieger richtig | 5 |
-| Podium P1 exakt | 3 |
+| Rennsieger richtig (= Podium P1) | 3 |
 | Podium P2 exakt | 2 |
 | Podium P3 exakt | 2 |
-| Podium-Bonus (richtig, falsche Pos.) | 1 je |
+| Podium-Bonus (Fahrer auf dem Podium, aber falsche Position) | 1 je |
 | Pole Position | 3 |
 | Schnellste Runde | 3 |
 | Bester Konstrukteur | 3 |
 | Perfekte Runde (alles richtig) | 5 Bonus |
 
-### Sprint (max. 8 Punkte)
+Der Rennsieger ist automatisch Podium P1. Deshalb gibt es keinen separaten P1-Tipp neben dem Sieger-Tipp.
+
+Der Podium-Bonus gilt für **P1, P2 und P3**: Wenn dein getippter Fahrer auf dem Podium landet, aber auf einer anderen der drei Positionen, bekommst du **1 Punkt**.
+
+### Sprint (max. 7 Punkte)
 
 | Kategorie | Punkte |
 |---|---|
@@ -130,6 +133,10 @@ Verspätete Tipps (`submittedAt` nach Deadline) = **0 Punkte**.
 | Konstrukteurs-WM (WCC) | 15 |
 
 **Tiebreaker**: Sieger-Tipps > Perfekte Runden > Pole-Tipps
+
+## Regression-Check
+
+Für schnelle Regeln-/Scoring-Checks gibt es `test-scoring.html`. Die Seite führt definierte Scoring-Szenarien automatisch im Browser aus, inklusive der Podium-Bonus-Fälle rund um **P1 ↔ P2/P3**.
 
 ## Fahrer-IDs
 

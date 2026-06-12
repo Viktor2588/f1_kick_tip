@@ -581,6 +581,7 @@ function checkCategoryCorrect(key, pred, result) {
 
 function checkCategoryPartial(key, pred, result) {
   // Partial: podium driver is on podium but wrong position
+  if (key === 'winner' && pred.winner && result.podium?.includes(pred.winner) && pred.winner !== result.winner) return true;
   if (key === 'podium-2' && pred.podium?.[1] && result.podium?.includes(pred.podium[1]) && pred.podium[1] !== result.podium[1]) return true;
   if (key === 'podium-3' && pred.podium?.[2] && result.podium?.includes(pred.podium[2]) && pred.podium[2] !== result.podium[2]) return true;
   return false;
@@ -821,7 +822,7 @@ function tipLabel(text, tooltip) {
 
 // Tooltip texts for each tip category
 const TIP_HINTS = {
-  podium0: '3 Punkte für den richtigen Rennsieger (= Podium P1).',
+  podium0: '3 Punkte für den richtigen Rennsieger (= Podium P1). 1 Punkt, wenn der Fahrer auf P2 oder P3 landet.',
   podium1: '2 Punkte bei richtiger Position. 1 Punkt wenn der Fahrer auf dem Podium landet, aber auf einer anderen Position.',
   podium2: '2 Punkte bei richtiger Position. 1 Punkt wenn der Fahrer auf dem Podium landet, aber auf einer anderen Position.',
   pole: '3 Punkte wenn du den Pole-Sitter richtig tippst. Das ist der Fahrer, der im Qualifying die schnellste Runde fährt.',

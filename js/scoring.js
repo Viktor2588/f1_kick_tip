@@ -11,7 +11,7 @@ import { isLate } from './utils.js';
  *
  * Breakdown keys:
  *   winner (0|3), podiumP2 (0|2), podiumP3 (0|2),
- *   podiumBonus (0-2), pole (0|3), fastestLap (0|3),
+ *   podiumBonus (0-3), pole (0|3), fastestLap (0|3),
  *   bestConstructor (0|3), perfectRound (0|5)
  *
  * Winner = P1 (merged), so no separate podiumP1.
@@ -42,17 +42,18 @@ export function scoreRace(prediction, result, race) {
   }
 
   // Podium exact positions (P2 & P3 only; P1 = winner)
-  const predPodium = prediction.podium || [];
-  const resPodium = result.podium || [];
+  const predPodium = [prediction.winner, prediction.podium?.[1], prediction.podium?.[2]];
+  const resPodium = [result.winner, result.podium?.[1], result.podium?.[2]];
 
   if (predPodium[1] === resPodium[1]) breakdown.podiumP2 = 2;
   if (predPodium[2] === resPodium[2]) breakdown.podiumP3 = 2;
 
-  // Podium bonus: driver on podium but wrong position (1 pt each, P2/P3 only)
-  for (let i = 1; i < 3; i++) {
+  // Podium bonus: driver on podium but wrong position (1 pt each, P1/P2/P3)
+  for (let i = 0; i < 3; i++) {
     const pred = predPodium[i];
     if (!pred) continue;
     const exactOnThisPos =
+      (i === 0 && breakdown.winner > 0) ||
       (i === 1 && breakdown.podiumP2 > 0) ||
       (i === 2 && breakdown.podiumP3 > 0);
     if (!exactOnThisPos && resPodium.includes(pred)) {
