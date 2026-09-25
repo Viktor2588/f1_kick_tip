@@ -242,7 +242,7 @@ function renderCalendar(season, results) {
   const isTest = !!document.body.dataset.basePath;
   const racePageUrl = isTest ? 'test-rennen.html' : 'rennen.html';
   const now = new Date();
-  let activeFound = false;
+  const next = getNextRace(season, results);
 
   container.innerHTML = season.races.map(race => {
     const roundStr = String(race.round);
@@ -250,9 +250,10 @@ function renderCalendar(season, results) {
     let statusClass = 'upcoming';
     if (hasResult) {
       statusClass = 'finished';
-    } else if (!activeFound) {
+    } else if (race === next) {
       statusClass = 'active';
-      activeFound = true;
+    } else if (new Date(race.raceStartUTC) <= now) {
+      statusClass = 'pending'; // past, result not entered yet
     }
 
     return `
