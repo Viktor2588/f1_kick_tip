@@ -140,6 +140,30 @@
         },
         expect: { winner: 0, podiumP2: 0, podiumBonus: 2, total: 2 },
       },
+      {
+        name: 'DNF und DNS richtig getippt',
+        prediction: { ...basePrediction, dnf: 'alonso', dns: 'stroll' },
+        result: {
+          ...neutralResult,
+          winner: 'russell',
+          podium: ['russell', 'hamilton', 'sainz'],
+          dnf: ['gasly', 'alonso'],
+          dns: ['stroll'],
+        },
+        expect: { dnf: 3, dns: 5, perfectRound: 0, total: 8 },
+      },
+      {
+        name: 'DNF-Tipp zählt nicht, wenn der Fahrer DNS ist',
+        prediction: { ...basePrediction, dnf: 'stroll' },
+        result: {
+          ...neutralResult,
+          winner: 'russell',
+          podium: ['russell', 'hamilton', 'sainz'],
+          dnf: [],
+          dns: ['stroll'],
+        },
+        expect: { dnf: 0, dns: 0, total: 0 },
+      },
     ];
 
     const resultsEl = document.getElementById('scoring-test-results');

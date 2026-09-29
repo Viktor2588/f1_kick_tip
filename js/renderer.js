@@ -494,7 +494,9 @@ function renderRacePredictions(season, race, predictions, results) {
     { key: 'pole', label: 'Pole Position', format: id => driverLastName(season, id) },
     { key: 'fastestLap', label: 'Schnellste Runde', format: id => driverLastName(season, id) },
     { key: 'bestConstructor', label: 'Bester Konstrukteur', format: id => teamName(season, id) },
-  ];
+    { key: 'dnf', label: 'DNF', format: id => driverLastName(season, id) },
+    { key: 'dns', label: 'DNS', format: id => driverLastName(season, id) },
+  ].filter(cat => !(result && !result.dnf && (cat.key === 'dnf' || cat.key === 'dns'))); // older rounds had no DNF/DNS
 
   let html = '';
   if (!revealed) {
@@ -559,6 +561,7 @@ function renderRacePredictions(season, race, predictions, results) {
       if (cat.key === 'podium-2') resultValue = result.podium?.[1] ? driverLastName(season, result.podium[1]) : '-';
       else if (cat.key === 'podium-3') resultValue = result.podium?.[2] ? driverLastName(season, result.podium[2]) : '-';
       else if (cat.key === 'bestConstructor') resultValue = result[cat.key] ? teamName(season, result[cat.key]) : '-';
+      else if (cat.key === 'dnf' || cat.key === 'dns') resultValue = result[cat.key]?.length ? result[cat.key].map(id => driverLastName(season, id)).join(', ') : '-';
       else resultValue = result[cat.key] ? driverLastName(season, result[cat.key]) : '-';
       html += `<td class="fw-bold">${resultValue}</td>`;
     }
@@ -577,6 +580,7 @@ function checkCategoryCorrect(key, pred, result) {
   if (key === 'pole') return pred.pole === result.pole;
   if (key === 'fastestLap') return pred.fastestLap === result.fastestLap;
   if (key === 'bestConstructor') return pred.bestConstructor === result.bestConstructor;
+  if (key === 'dnf' || key === 'dns') return !!pred[key] && !!result[key]?.includes(pred[key]);
   return false;
 }
 
@@ -740,6 +744,17 @@ function renderRaceResult(season, race, results) {
           <div class="fw-bold">${teamName(season, result.bestConstructor)}</div>
         </div>
       </div>
+      ${result.dnf || result.dns ? `
+      <div class="grid grid-2 mt-md" style="text-align: center; font-size: 0.9rem;">
+        <div>
+          <div class="text-muted">DNF</div>
+          <div class="fw-bold">${result.dnf?.length ? result.dnf.map(id => driverLastName(season, id)).join(', ') : '–'}</div>
+        </div>
+        <div>
+          <div class="text-muted">DNS</div>
+          <div class="fw-bold">${result.dns?.length ? result.dns.map(id => driverLastName(season, id)).join(', ') : '–'}</div>
+        </div>
+      </div>` : ''}
     </div>
   `;
 }
@@ -794,6 +809,9 @@ function renderRacePointsBreakdown(season, race, predictions, results, sprintPre
         <div class="points-row"><span>Schnellste Runde</span><span class="points-value ${score.breakdown.fastestLap > 0 ? 'positive' : 'zero'}">${score.breakdown.fastestLap}</span></div>
         <div class="points-row"><span>Bester Konstrukteur</span><span class="points-value ${score.breakdown.bestConstructor > 0 ? 'positive' : 'zero'}">${score.breakdown.bestConstructor}</span></div>
         <div class="points-row"><span>Perfekte Runde</span><span class="points-value ${score.breakdown.perfectRound > 0 ? 'positive' : 'zero'}">${score.breakdown.perfectRound}</span></div>
+        ${result.dnf || result.dns ? `
+        <div class="points-row"><span>DNF</span><span class="points-value ${score.breakdown.dnf > 0 ? 'positive' : 'zero'}">${score.breakdown.dnf}</span></div>
+        <div class="points-row"><span>DNS</span><span class="points-value ${score.breakdown.dns > 0 ? 'positive' : 'zero'}">${score.breakdown.dns}</span></div>` : ''}
         <div class="points-row fw-bold"><span>Rennen gesamt</span><span>${totalRace}</span></div>
         ` : '<div class="points-row text-muted"><span>Kein Tipp / Verspätet</span><span>0</span></div>'}
 
@@ -829,6 +847,8 @@ const TIP_HINTS = {
   pole: '3 Punkte wenn du den Pole-Sitter richtig tippst. Das ist der Fahrer, der im Qualifying die schnellste Runde fährt.',
   fastestLap: '3 Punkte wenn du tippst, wer die schnellste Runde im Rennen fährt.',
   bestConstructor: '3 Punkte wenn du tippst, welches Team die meisten Punkte in diesem Rennen holt.',
+  dnf: '3 Punkte wenn dein Fahrer das Rennen startet, aber nicht ins Ziel kommt (Did Not Finish). Freiwillig.',
+  dns: '5 Punkte wenn dein Fahrer zum Rennen gar nicht erst startet (Did Not Start). Freiwillig.',
   sprintPodium0: '3 Punkte für den richtigen Sprint-Sieger (= Sprint P1).',
   sprintP1: '1 Punkt bei richtiger Position. 1 Punkt Bonus wenn auf dem Podium aber falsche Position.',
   sprintP2: '1 Punkt bei richtiger Position. 1 Punkt Bonus wenn auf dem Podium aber falsche Position.',
@@ -1122,6 +1142,14 @@ function renderTipForm(season, race, predictions, results, data) {
           <label class="form-label">${tipLabel('Bester Konstrukteur', TIP_HINTS.bestConstructor)}</label>
           ${teamSearchSelect(season, 'bestConstructor', existing?.bestConstructor)}
         </div>
+        <div class="form-group">
+          <label class="form-label">${tipLabel('DNF (Ausfall)', TIP_HINTS.dnf)}</label>
+          ${driverSearchSelect(season, 'dnf', existing?.dnf)}
+        </div>
+        <div class="form-group">
+          <label class="form-label">${tipLabel('DNS (Nicht gestartet)', TIP_HINTS.dns)}</label>
+          ${driverSearchSelect(season, 'dns', existing?.dns)}
+        </div>
         <div class="form-actions">
           <button type="button" class="btn btn-primary" id="race-tip-submit">Tipp abgeben</button>
         </div>
@@ -1150,6 +1178,11 @@ function renderTipForm(season, race, predictions, results, data) {
       return;
     }
 
+    if (vals.dnf && vals.dnf === vals.dns) {
+      showTipToast('DNF und DNS: Ein Fahrer kann nicht beides sein!', 'error');
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gespeichert...';
 
@@ -1160,6 +1193,8 @@ function renderTipForm(season, race, predictions, results, data) {
         pole: vals.pole || '',
         fastestLap: vals.fastestLap || '',
         bestConstructor: vals.bestConstructor || '',
+        dnf: vals.dnf || '',
+        dns: vals.dns || '',
       });
       showTipToast('Tipp gespeichert!');
       const newData = await import('./utils.js').then(m => m.loadAllData());

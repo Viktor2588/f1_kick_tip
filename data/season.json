@@ -134,43 +134,49 @@
       "qualiStartUTC": "2026-09-25T12:00:00Z", "sprintStartUTC": null, "sprint": false
     },
     {
-      "round": 16, "name": "Großer Preis von Singapur", "country": "Singapur",
+      "round": 16, "name": "Großer Preis von Bahrain (in Malaysia)", "country": "Malaysia",
+      "countryCode": "MY", "circuit": "Sepang International Circuit", "city": "Sepang",
+      "date": "2026-10-04", "raceStartUTC": "2026-10-04T07:00:00Z",
+      "qualiStartUTC": "2026-10-03T08:00:00Z", "sprintStartUTC": null, "sprint": false
+    },
+    {
+      "round": 17, "name": "Großer Preis von Singapur", "country": "Singapur",
       "countryCode": "SG", "circuit": "Marina Bay Street Circuit", "city": "Singapur",
       "date": "2026-10-11", "raceStartUTC": "2026-10-11T12:00:00Z",
       "qualiStartUTC": "2026-10-10T13:00:00Z", "sprintStartUTC": "2026-10-10T09:30:00Z", "sprint": true
     },
     {
-      "round": 17, "name": "Großer Preis der USA", "country": "USA",
+      "round": 18, "name": "Großer Preis der USA", "country": "USA",
       "countryCode": "US", "circuit": "Circuit of the Americas", "city": "Austin",
       "date": "2026-10-25", "raceStartUTC": "2026-10-25T19:00:00Z",
       "qualiStartUTC": "2026-10-24T20:00:00Z", "sprintStartUTC": null, "sprint": false
     },
     {
-      "round": 18, "name": "Großer Preis von Mexiko", "country": "Mexiko",
+      "round": 19, "name": "Großer Preis von Mexiko", "country": "Mexiko",
       "countryCode": "MX", "circuit": "Aut\u00f3dromo Hermanos Rodr\u00edguez", "city": "Mexiko-Stadt",
       "date": "2026-11-01", "raceStartUTC": "2026-11-01T20:00:00Z",
       "qualiStartUTC": "2026-10-31T21:00:00Z", "sprintStartUTC": null, "sprint": false
     },
     {
-      "round": 19, "name": "Großer Preis von Brasilien", "country": "Brasilien",
+      "round": 20, "name": "Großer Preis von Brasilien", "country": "Brasilien",
       "countryCode": "BR", "circuit": "Aut\u00f3dromo Jos\u00e9 Carlos Pace", "city": "S\u00e3o Paulo",
       "date": "2026-11-08", "raceStartUTC": "2026-11-08T17:00:00Z",
       "qualiStartUTC": "2026-11-07T18:00:00Z", "sprintStartUTC": null, "sprint": false
     },
     {
-      "round": 20, "name": "Großer Preis von Las Vegas", "country": "USA",
+      "round": 21, "name": "Großer Preis von Las Vegas", "country": "USA",
       "countryCode": "US", "circuit": "Las Vegas Strip Circuit", "city": "Las Vegas",
       "date": "2026-11-21", "raceStartUTC": "2026-11-22T06:00:00Z",
       "qualiStartUTC": "2026-11-21T06:00:00Z", "sprintStartUTC": null, "sprint": false
     },
     {
-      "round": 21, "name": "Großer Preis von Katar", "country": "Katar",
+      "round": 22, "name": "Großer Preis von Katar", "country": "Katar",
       "countryCode": "QA", "circuit": "Lusail International Circuit", "city": "Lusail",
       "date": "2026-11-29", "raceStartUTC": "2026-11-29T14:00:00Z",
       "qualiStartUTC": "2026-11-28T15:00:00Z", "sprintStartUTC": null, "sprint": false
     },
     {
-      "round": 22, "name": "Großer Preis von Abu Dhabi", "country": "Abu Dhabi",
+      "round": 23, "name": "Großer Preis von Abu Dhabi", "country": "Abu Dhabi",
       "countryCode": "AE", "circuit": "Yas Marina Circuit", "city": "Abu Dhabi",
       "date": "2026-12-06", "raceStartUTC": "2026-12-06T13:00:00Z",
       "qualiStartUTC": "2026-12-05T14:00:00Z", "sprintStartUTC": null, "sprint": false

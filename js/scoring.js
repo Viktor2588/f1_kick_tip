@@ -12,10 +12,12 @@ import { isLate } from './utils.js';
  * Breakdown keys:
  *   winner (0|3), podiumP2 (0|2), podiumP3 (0|2),
  *   podiumBonus (0-3), pole (0|3), fastestLap (0|3),
- *   bestConstructor (0|3), perfectRound (0|5)
+ *   bestConstructor (0|3), perfectRound (0|5), dnf (0|3), dns (0|5)
  *
  * Winner = P1 (merged), so no separate podiumP1.
- * Max per race: 3+2+2+3+3+3+5 = 21
+ * Max per race: 3+2+2+3+3+3+5 = 21, plus 3+5 = 8 for DNF/DNS
+ * (only on results that have DNF/DNS lists, i.e. from round 16 on).
+ * DNF/DNS don't count towards the perfect round.
  */
 export function scoreRace(prediction, result, race) {
   const breakdown = {
@@ -27,13 +29,16 @@ export function scoreRace(prediction, result, race) {
     fastestLap: 0,
     bestConstructor: 0,
     perfectRound: 0,
+    dnf: 0,
+    dns: 0,
   };
 
-  if (!prediction || !result) return { total: 0, breakdown, isPerfect: false };
+  const max = raceMaxPoints(result);
+  if (!prediction || !result) return { total: 0, breakdown, isPerfect: false, max };
 
   // Late submission → 0 points
   if (isLate(prediction.submittedAt, race.raceStartUTC)) {
-    return { total: 0, breakdown, isPerfect: false, late: true };
+    return { total: 0, breakdown, isPerfect: false, late: true, max };
   }
 
   // Winner = P1 (3 pts)
@@ -90,9 +95,18 @@ export function scoreRace(prediction, result, race) {
     breakdown.perfectRound = 5;
   }
 
+  // DNF (3 pts) / DNS (5 pts): tipped driver is in the result list
+  if (prediction.dnf && result.dnf?.includes(prediction.dnf)) breakdown.dnf = 3;
+  if (prediction.dns && result.dns?.includes(prediction.dns)) breakdown.dns = 5;
+
   const total = Object.values(breakdown).reduce((sum, v) => sum + v, 0);
 
-  return { total, breakdown, isPerfect };
+  return { total, breakdown, isPerfect, max };
+}
+
+/** Max race points: 21, plus 8 if the result has DNF/DNS lists. */
+function raceMaxPoints(result) {
+  return 21 + (Array.isArray(result?.dnf) ? 8 : 0);
 }
 
 /**
@@ -291,12 +305,9 @@ export function calculateStandings(season, predictions, sprintPredictions, resul
  * Accuracy = totalPoints / maxPossiblePoints for completed races.
  */
 export function calculateAccuracy(raceScores, sprintScores) {
-  const raceCount = Object.keys(raceScores).length;
   const sprintCount = Object.keys(sprintScores).length;
 
-  if (raceCount === 0 && sprintCount === 0) return 0;
-
-  const maxRace = raceCount * 21; // max 21 per race
+  const maxRace = Object.values(raceScores).reduce((sum, s) => sum + s.max, 0);
   const maxSprint = sprintCount * 7; // max 7 per sprint
   const maxTotal = maxRace + maxSprint;
 

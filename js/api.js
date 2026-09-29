@@ -55,7 +55,8 @@ export async function fetchAllData() {
       predictions[r][row.player_id] = {
         winner: row.winner, podium: [row.podium_p1, row.podium_p2, row.podium_p3],
         pole: row.pole, fastestLap: row.fastest_lap,
-        bestConstructor: row.best_constructor, submittedAt: row.submitted_at,
+        bestConstructor: row.best_constructor, dnf: row.dnf, dns: row.dns,
+        submittedAt: row.submitted_at,
       };
     }
 
@@ -82,6 +83,7 @@ export async function fetchAllData() {
         winner: row.winner, podium: [row.podium_p1, row.podium_p2, row.podium_p3],
         pole: row.pole, fastestLap: row.fastest_lap,
         bestConstructor: row.best_constructor, topTen: row.top_ten || undefined,
+        dnf: row.dnf || undefined, dns: row.dns || undefined,
         enteredAt: row.entered_at,
       };
     }
@@ -117,13 +119,14 @@ export async function fetchAllData() {
 
 export async function submitRacePrediction(round, playerId, data) {
   const now = new Date().toISOString();
-  await sql`INSERT INTO race_predictions (round, player_id, winner, podium_p1, podium_p2, podium_p3, pole, fastest_lap, best_constructor, submitted_at)
+  await sql`INSERT INTO race_predictions (round, player_id, winner, podium_p1, podium_p2, podium_p3, pole, fastest_lap, best_constructor, dnf, dns, submitted_at)
     VALUES (${round}, ${playerId}, ${data.winner}, ${data.podium[0] || ''}, ${data.podium[1] || ''}, ${data.podium[2] || ''},
-            ${data.pole || ''}, ${data.fastestLap || ''}, ${data.bestConstructor || ''}, ${now})
+            ${data.pole || ''}, ${data.fastestLap || ''}, ${data.bestConstructor || ''}, ${data.dnf || ''}, ${data.dns || ''}, ${now})
     ON CONFLICT (round, player_id) DO UPDATE SET
       winner = EXCLUDED.winner, podium_p1 = EXCLUDED.podium_p1, podium_p2 = EXCLUDED.podium_p2,
       podium_p3 = EXCLUDED.podium_p3, pole = EXCLUDED.pole, fastest_lap = EXCLUDED.fastest_lap,
-      best_constructor = EXCLUDED.best_constructor, submitted_at = EXCLUDED.submitted_at`;
+      best_constructor = EXCLUDED.best_constructor, dnf = EXCLUDED.dnf, dns = EXCLUDED.dns,
+      submitted_at = EXCLUDED.submitted_at`;
 }
 
 export async function submitSprintPrediction(round, playerId, data) {
@@ -150,13 +153,15 @@ export async function deleteSeasonPrediction(playerId) {
 
 export async function submitRaceResult(round, data) {
   const now = new Date().toISOString();
-  await sql`INSERT INTO race_results (round, winner, podium_p1, podium_p2, podium_p3, pole, fastest_lap, best_constructor, top_ten, entered_at)
+  await sql`INSERT INTO race_results (round, winner, podium_p1, podium_p2, podium_p3, pole, fastest_lap, best_constructor, top_ten, dnf, dns, entered_at)
     VALUES (${round}, ${data.winner}, ${data.podium[0] || ''}, ${data.podium[1] || ''}, ${data.podium[2] || ''},
-            ${data.pole || ''}, ${data.fastestLap || ''}, ${data.bestConstructor || ''}, ${data.topTen || null}, ${now})
+            ${data.pole || ''}, ${data.fastestLap || ''}, ${data.bestConstructor || ''}, ${data.topTen || null},
+            ${data.dnf || null}, ${data.dns || null}, ${now})
     ON CONFLICT (round) DO UPDATE SET
       winner = EXCLUDED.winner, podium_p1 = EXCLUDED.podium_p1, podium_p2 = EXCLUDED.podium_p2,
       podium_p3 = EXCLUDED.podium_p3, pole = EXCLUDED.pole, fastest_lap = EXCLUDED.fastest_lap,
-      best_constructor = EXCLUDED.best_constructor, top_ten = EXCLUDED.top_ten, entered_at = EXCLUDED.entered_at`;
+      best_constructor = EXCLUDED.best_constructor, top_ten = EXCLUDED.top_ten,
+      dnf = EXCLUDED.dnf, dns = EXCLUDED.dns, entered_at = EXCLUDED.entered_at`;
 }
 
 export async function submitSprintResult(round, data) {

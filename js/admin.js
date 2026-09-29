@@ -148,6 +148,14 @@ function podiumInputsHTML(prefix, podium) {
     </div>`;
 }
 
+// ── Driver checkboxes (for DNF/DNS lists) ──
+function driverChecksHTML(name, selected) {
+  const sel = selected || [];
+  return `<div class="driver-checks">${state.season.drivers.map(d => `
+    <label><input type="checkbox" name="${name}" value="${d.id}" ${sel.includes(d.id) ? 'checked' : ''}> ${d.name}</label>`).join('')}
+  </div>`;
+}
+
 // ── Top Ten Input (10 driver selects) ──
 function topTenInputsHTML(prefix, topTen) {
   const t = topTen || Array(10).fill('');
@@ -207,6 +215,14 @@ function renderResultsForm(round) {
         <div class="form-group">
           <label class="form-label">Bester Konstrukteur</label>
           ${teamSelectHTML('bestConstructor', result.bestConstructor)}
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label">DNF (gestartet, nicht ins Ziel gekommen)</label>
+          ${driverChecksHTML('dnf', result.dnf)}
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label">DNS (nicht gestartet)</label>
+          ${driverChecksHTML('dns', result.dns)}
         </div>
         <div class="form-group" style="grid-column: 1 / -1;">
           <details>
@@ -271,6 +287,8 @@ async function saveResult(round) {
     fastestLap: fd.get('fastestLap') || '',
     bestConstructor: fd.get('bestConstructor') || '',
     topTen: topTen.length > 0 ? topTen : undefined,
+    dnf: fd.getAll('dnf'),
+    dns: fd.getAll('dns'),
     enteredAt: new Date().toISOString(),
   };
 
@@ -337,6 +355,14 @@ function renderPredictionsForm(round) {
             ${teamSelectHTML(`bestConstructor`, pred.bestConstructor)}
           </div>
           <div class="form-group">
+            <label class="form-label">DNF</label>
+            ${driverSelectHTML(`dnf`, pred.dnf)}
+          </div>
+          <div class="form-group">
+            <label class="form-label">DNS</label>
+            ${driverSelectHTML(`dns`, pred.dns)}
+          </div>
+          <div class="form-group">
             <label class="form-label">Abgabe-Zeitpunkt</label>
             <input type="datetime-local" class="form-input" name="submittedAt"
                    value="${toDatetimeLocal(pred.submittedAt)}">
@@ -383,6 +409,8 @@ async function savePredictions(round) {
       pole: fd.get('pole') || '',
       fastestLap: fd.get('fastestLap') || '',
       bestConstructor: fd.get('bestConstructor') || '',
+      dnf: fd.get('dnf') || '',
+      dns: fd.get('dns') || '',
     };
 
     promises.push(

@@ -13,6 +13,49 @@ const KNOWN_PLAYERS = [
   { id: 'viktor', name: 'Viktor', emoji: '\u26A1', color: '#00B4D8' },
 ];
 
+// Latest update notification: shown once per browser. For a new update, change `id`.
+const LATEST_UPDATE = {
+  id: '2026-09-29',
+  title: 'Update',
+  items: [
+    'Ergebnis Baku (Runde 15) ist eingetragen.',
+    'Neu: Runde 16 – GP von Bahrain in Malaysia (Sepang), So 4.10. Bahrain selbst wurde abgesagt.',
+    'Singapur bis Abu Dhabi sind dadurch jeweils eine Runde nach hinten gerückt (17–23).',
+    'Neu ab Runde 16: DNF & DNS tippen – je ein Fahrer, freiwillig. DNF richtig = 3 Punkte, DNS richtig = 5 Punkte. Details unter Regeln.',
+  ],
+};
+const UPDATE_KEY = 'f1_seen_update';
+
+function renderUpdateNotice() {
+  const nav = document.querySelector('.nav-links');
+  if (!nav) return;
+  let seen = null;
+  try { seen = localStorage.getItem(UPDATE_KEY); } catch {}
+  if (seen === LATEST_UPDATE.id) return;
+
+  const li = document.createElement('li');
+  li.className = 'nav-update';
+  li.innerHTML = `<button class="update-btn" aria-label="Neues Update anzeigen" title="Neues Update">i<span class="update-dot"></span></button>`;
+  li.querySelector('button').addEventListener('click', () => {
+    try { localStorage.setItem(UPDATE_KEY, LATEST_UPDATE.id); } catch {}
+    li.remove();
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal-content" role="dialog" aria-modal="true">
+        <button class="modal-close" aria-label="Schließen">&times;</button>
+        <h2 class="modal-title">${LATEST_UPDATE.title}</h2>
+        <ul class="update-list">${LATEST_UPDATE.items.map(t => `<li>${t}</li>`).join('')}</ul>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal || e.target.classList.contains('modal-close')) modal.remove();
+    });
+  });
+  nav.prepend(li);
+}
+
 /**
  * Render the auth UI in the header (name badge or "Name wählen").
  */
@@ -131,6 +174,7 @@ async function init() {
 
   // Render auth UI on all pages
   renderAuthUI();
+  renderUpdateNotice();
 
   try {
     const data = await loadAllData(basePath);
