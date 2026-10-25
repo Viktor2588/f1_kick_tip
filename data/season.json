@@ -148,7 +148,7 @@
     {
       "round": 18, "name": "Großer Preis der USA", "country": "USA",
       "countryCode": "US", "circuit": "Circuit of the Americas", "city": "Austin",
-      "date": "2026-10-25", "raceStartUTC": "2026-10-25T19:00:00Z",
+      "date": "2026-10-25", "raceStartUTC": "2026-10-25T20:00:00Z",
       "qualiStartUTC": "2026-10-24T20:00:00Z", "sprintStartUTC": null, "sprint": false
     },
     {

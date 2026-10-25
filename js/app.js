@@ -15,14 +15,10 @@ const KNOWN_PLAYERS = [
 
 // Latest update notification: shown once per browser. For a new update, change `id`.
 const LATEST_UPDATE = {
-  id: '2026-09-29-2',
+  id: '2026-10-25',
   title: 'Update',
   items: [
-    'Ergebnis Baku (Runde 15) ist eingetragen.',
-    'Neu: Runde 16 – GP von Bahrain in Malaysia (Sepang), So 4.10. Bahrain selbst wurde abgesagt.',
-    'Singapur bis Abu Dhabi sind dadurch jeweils eine Runde nach hinten gerückt (17–23).',
-    'Neu ab Runde 16: DNF & DNS tippen – je ein Fahrer, freiwillig. DNF richtig = 3 Punkte, DNS richtig = 5 Punkte. Details unter Regeln.',
-    'Ergebnisse werden ab jetzt automatisch jeden Montag um 8:00 Uhr eingetragen.',
+    'Startzeit GP der USA korrigiert: Rennstart ist heute um 21:00 Uhr – bis dahin könnt ihr noch tippen.',
   ],
 };
 const UPDATE_KEY = 'f1_seen_update';
