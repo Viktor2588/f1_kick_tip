@@ -166,14 +166,14 @@
     {
       "round": 21, "name": "Großer Preis von Las Vegas", "country": "USA",
       "countryCode": "US", "circuit": "Las Vegas Strip Circuit", "city": "Las Vegas",
-      "date": "2026-11-21", "raceStartUTC": "2026-11-22T06:00:00Z",
-      "qualiStartUTC": "2026-11-21T06:00:00Z", "sprintStartUTC": null, "sprint": false
+      "date": "2026-11-21", "raceStartUTC": "2026-11-22T04:00:00Z",
+      "qualiStartUTC": "2026-11-21T04:00:00Z", "sprintStartUTC": null, "sprint": false
     },
     {
       "round": 22, "name": "Großer Preis von Katar", "country": "Katar",
       "countryCode": "QA", "circuit": "Lusail International Circuit", "city": "Lusail",
-      "date": "2026-11-29", "raceStartUTC": "2026-11-29T14:00:00Z",
-      "qualiStartUTC": "2026-11-28T15:00:00Z", "sprintStartUTC": null, "sprint": false
+      "date": "2026-11-29", "raceStartUTC": "2026-11-29T16:00:00Z",
+      "qualiStartUTC": "2026-11-28T18:00:00Z", "sprintStartUTC": null, "sprint": false
     },
     {
       "round": 23, "name": "Großer Preis von Abu Dhabi", "country": "Abu Dhabi",
