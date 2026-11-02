@@ -13,7 +13,7 @@
     { "id": "astonmartin", "name": "Aston Martin", "color": "#229971", "drivers": ["alonso", "stroll"] },
     { "id": "williams", "name": "Williams", "color": "#64C4FF", "drivers": ["albon", "sainz"] },
     { "id": "racingbulls", "name": "Racing Bulls", "color": "#6692FF", "drivers": ["lawson", "lindblad"] },
-    { "id": "haas", "name": "Haas", "color": "#B6BABD", "drivers": ["ocon", "bearman"] },
+    { "id": "haas", "name": "Haas", "color": "#B6BABD", "drivers": ["ocon", "bearman", "hirakawa"] },
     { "id": "audi", "name": "Audi", "color": "#00E701", "drivers": ["hulkenberg", "bortoleto"] },
     { "id": "alpine", "name": "Alpine", "color": "#0093CC", "drivers": ["gasly", "colapinto"] },
     { "id": "cadillac", "name": "Cadillac", "color": "#C0C0C0", "drivers": ["bottas", "perez"] }
@@ -34,6 +34,7 @@
     { "id": "lawson", "name": "Liam Lawson", "number": 30, "team": "racingbulls" },
     { "id": "lindblad", "name": "Arvid Lindblad", "number": 45, "team": "racingbulls" },
     { "id": "ocon", "name": "Esteban Ocon", "number": 31, "team": "haas" },
+    { "id": "hirakawa", "name": "Ryo Hirakawa", "number": 50, "team": "haas" },
     { "id": "bearman", "name": "Oliver Bearman", "number": 87, "team": "haas" },
     { "id": "hulkenberg", "name": "Nico H\u00fclkenberg", "number": 27, "team": "audi" },
     { "id": "bortoleto", "name": "Gabriel Bortoleto", "number": 5, "team": "audi" },

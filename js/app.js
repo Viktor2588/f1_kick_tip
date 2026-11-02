@@ -15,11 +15,11 @@ const KNOWN_PLAYERS = [
 
 // Latest update notification: shown once per browser. For a new update, change `id`.
 const LATEST_UPDATE = {
-  id: '2026-10-25-2',
+  id: '2026-11-02',
   title: 'Update',
   items: [
-    'Startzeit GP der USA korrigiert: Rennstart ist heute um 21:00 Uhr.',
-    'Startzeiten Las Vegas und Katar korrigiert: Las Vegas So 22.11. um 5:00 Uhr, Katar So 29.11. um 17:00 Uhr (deutsche Zeit).',
+    'Ergebnis Mexiko ist eingetragen.',
+    'Ersatzfahrer Ryo Hirakawa (Haas) ist jetzt in der Fahrerliste.',
   ],
 };
 const UPDATE_KEY = 'f1_seen_update';
