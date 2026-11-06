@@ -1033,7 +1033,9 @@ function initSearchSelects(container) {
       searchInput.value = '';
       updateGroupExclusions();
       filterOptions('');
-      setTimeout(() => searchInput.focus(), 10);
+      // Keep the open list clear of the fixed bottom tab bar on phones
+      dropdown.scrollIntoView({ block: 'nearest' });
+      setTimeout(() => searchInput.focus({ preventScroll: true }), 10);
     }
 
     function close(el) {
