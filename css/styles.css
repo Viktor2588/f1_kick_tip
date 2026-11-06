@@ -1100,7 +1100,7 @@ a.card:hover { text-decoration: none; background: var(--bg-card-hover); border-c
 .ss-search input::placeholder { color: var(--text-muted); }
 .ss-options { max-height: min(280px, 40vh); max-height: min(280px, 40dvh); overflow-y: auto; overscroll-behavior: contain; }
 .search-select-dropdown { scroll-margin-bottom: calc(var(--nav-height) + var(--safe-bottom) + var(--space-sm)); scroll-margin-top: 110px; }
-@media (min-width: 768px) { .ss-options { max-height: 280px; } .search-select-dropdown { scroll-margin-bottom: var(--space-sm); } }
+@media (min-width: 768px) { .ss-options { max-height: 280px; } .search-select-dropdown { scroll-margin: 0; } }
 .ss-option { display: flex; align-items: center; gap: var(--space-sm); padding: 10px 12px; cursor: pointer; font-size: var(--font-sm); }
 .ss-option:hover, .ss-option.highlighted { background: var(--bg-card-hover); }
 .ss-option.selected { background: var(--info-bg); font-weight: 600; }

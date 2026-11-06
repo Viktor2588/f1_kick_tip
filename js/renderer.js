@@ -1033,9 +1033,10 @@ function initSearchSelects(container) {
       searchInput.value = '';
       updateGroupExclusions();
       filterOptions('');
-      // Keep the open list clear of the fixed bottom tab bar on phones
-      dropdown.scrollIntoView({ block: 'nearest' });
-      setTimeout(() => searchInput.focus({ preventScroll: true }), 10);
+      // Phones: keep the open list clear of the fixed bottom tab bar
+      const isPhone = window.matchMedia('(max-width: 767px)').matches;
+      if (isPhone) dropdown.scrollIntoView({ block: 'nearest' });
+      setTimeout(() => searchInput.focus(isPhone ? { preventScroll: true } : undefined), 10);
     }
 
     function close(el) {
