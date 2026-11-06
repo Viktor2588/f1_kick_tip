@@ -26,6 +26,9 @@ export function validateRaceResult(data: SeasonData, round: number, r: RaceResul
 }
 
 export async function saveRaceResult(db: Db, data: SeasonData, round: number, r: RaceResultInput, now = new Date()): Promise<SaveResult> {
+  // A result reveals all tips of the round and closes tipping, so it can only exist once the race has started.
+  const race = data.races.find(x => x.round === round);
+  if (race && now < new Date(race.raceStartUTC)) return { ok: false, status: 403, message: 'Das Rennen hat noch nicht begonnen.' };
   const error = validateRaceResult(data, round, r);
   if (error) return { ok: false, status: 400, message: error };
   const withLists = round >= DNF_FROM_ROUND;
@@ -42,7 +45,8 @@ export async function saveRaceResult(db: Db, data: SeasonData, round: number, r:
 export async function saveSprintResult(db: Db, data: SeasonData, round: number, r: SprintResultInput, now = new Date()): Promise<SaveResult> {
   const race = data.races.find(x => x.round === round);
   if (!race) return { ok: false, status: 404, message: 'Rennen nicht gefunden.' };
-  if (!race.sprint) return { ok: false, status: 400, message: 'Kein Sprint an diesem Wochenende.' };
+  if (!race.sprint || !race.sprintStartUTC) return { ok: false, status: 400, message: 'Kein Sprint an diesem Wochenende.' };
+  if (now < new Date(race.sprintStartUTC)) return { ok: false, status: 403, message: 'Der Sprint hat noch nicht begonnen.' };
   const drivers = knownDrivers(data);
   if (!r.winner || !r.p2 || !r.p3) return { ok: false, status: 400, message: 'Bitte P1, P2 und P3 eintragen.' };
   if (![r.winner, r.p2, r.p3].every(id => drivers.has(id))) return { ok: false, status: 400, message: 'Unbekannter Fahrer.' };

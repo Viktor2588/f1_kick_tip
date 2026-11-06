@@ -42,7 +42,7 @@
   <div class="side">
     <section class="card">
       <h2>Login-Links</h2>
-      <p class="muted small">Ein neuer Link ersetzt den alten. Schick ihn per Messenger an den Spieler.</p>
+      <p class="muted small">Ein neuer Link ersetzt den alten und meldet den Spieler überall ab. Schick ihn per Messenger an den Spieler. Ein Link für dich selbst meldet auch dich hier ab.</p>
       <div class="players">
         {#each players as p}
           <form method="POST" action="?/link" use:enhance>

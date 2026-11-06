@@ -16,14 +16,15 @@ async function demoDb() {
   return { db, year: season.season, load: () => loadSeason(db, season.season) };
 }
 
+const SEASON_END = new Date('2026-12-31T00:00:00Z');
 const result = { winner: 'norris', p2: 'piastri', p3: 'leclerc', pole: 'norris', fastestLap: 'piastri', bestConstructor: 'mclaren', dnf: ['stroll'], dns: [] as string[] };
 
 describe('race results', () => {
   it('before round 16 no DNF/DNS lists are stored (max stays 21), from round 16 they are (max 29)', async () => {
     const { db, load } = await demoDb();
     let data = await load();
-    expect(await saveRaceResult(db, data, 5, result)).toEqual({ ok: true });
-    expect(await saveRaceResult(db, data, 16, result)).toEqual({ ok: true });
+    expect(await saveRaceResult(db, data, 5, result, SEASON_END)).toEqual({ ok: true });
+    expect(await saveRaceResult(db, data, 16, result, SEASON_END)).toEqual({ ok: true });
     data = await load();
     expect(data.game.raceResults[5].dnf).toBeUndefined();
     expect(data.game.raceResults[16].dnf).toEqual(['stroll']);
@@ -37,7 +38,7 @@ describe('race results', () => {
     const data = await load();
     const tipTime = new Date(new Date(data.races[19].raceStartUTC).getTime() - 3600_000);
     await saveRaceTip(db, data, 'thomas', 20, { winner: 'norris', p2: 'piastri', p3: 'leclerc', pole: 'norris', fastestLap: 'piastri', bestConstructor: 'mclaren', dnf: 'stroll', dns: '' }, tipTime);
-    await saveRaceResult(db, await load(), 20, result);
+    await saveRaceResult(db, await load(), 20, result, SEASON_END);
     const after = calculateStandings((await load()).game);
     const thomas = (st: typeof after) => st.find(s => s.playerId === 'thomas')!;
     expect(thomas(after).totalPoints - thomas(before).totalPoints).toBe(21 + 3); // perfect round + DNF
@@ -48,14 +49,32 @@ describe('race results', () => {
   it('validates results', async () => {
     const { db, load } = await demoDb();
     const data = await load();
-    const bad = (patch: Partial<typeof result>) => saveRaceResult(db, data, 20, { ...result, ...patch });
+    const bad = (patch: Partial<typeof result>) => saveRaceResult(db, data, 20, { ...result, ...patch }, SEASON_END);
     expect(await bad({ p2: 'norris' })).toMatchObject({ ok: false, status: 400 });
     expect(await bad({ pole: '' })).toMatchObject({ ok: false, status: 400 });
     expect(await bad({ bestConstructor: 'brabham' })).toMatchObject({ ok: false, status: 400 });
     expect(await bad({ dnf: ['alonso'], dns: ['alonso'] })).toMatchObject({ ok: false, status: 400 });
     expect(await bad({ dnf: ['norris'] })).toMatchObject({ ok: false, status: 400 });
-    expect(await saveRaceResult(db, data, 99, result)).toMatchObject({ ok: false, status: 400 });
-    expect(await saveSprintResult(db, data, 20, { winner: 'norris', p2: 'piastri', p3: 'leclerc' })).toMatchObject({ ok: false, status: 400 });
+    expect(await saveRaceResult(db, data, 99, result, SEASON_END)).toMatchObject({ ok: false, status: 400 });
+    expect(await saveSprintResult(db, data, 20, { winner: 'norris', p2: 'piastri', p3: 'leclerc' }, SEASON_END)).toMatchObject({ ok: false, status: 400 });
+  });
+});
+
+describe('results only after the start (review F2)', () => {
+  it('refuses race and sprint results before the start, accepts them afterwards', async () => {
+    const { db, load } = await demoDb();
+    const data = await load();
+    const r20 = data.races.find(r => r.round === 20)!;
+    const start = new Date(r20.raceStartUTC);
+    expect(await saveRaceResult(db, data, 20, result, new Date(start.getTime() - 1000))).toMatchObject({ ok: false, status: 403 });
+    expect((await load()).game.raceResults[20]).toBeUndefined();
+    expect(await saveRaceResult(db, data, 20, result, start)).toEqual({ ok: true });
+
+    const sprintRace = data.races.find(r => r.sprint && r.sprintStartUTC)!;
+    const sStart = new Date(sprintRace.sprintStartUTC!);
+    const podium = { winner: 'norris', p2: 'piastri', p3: 'leclerc' };
+    expect(await saveSprintResult(db, data, sprintRace.round, podium, new Date(sStart.getTime() - 1000))).toMatchObject({ ok: false, status: 403 });
+    expect(await saveSprintResult(db, data, sprintRace.round, podium, sStart)).toEqual({ ok: true });
   });
 });
 

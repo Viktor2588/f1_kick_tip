@@ -6,7 +6,9 @@ import { saveChampions } from '$lib/server/results';
 import { requireAdmin } from '$lib/server/guard';
 import { formString } from '$lib/server/tips';
 
-export async function load() {
+export async function load({ locals }) {
+  // Page loads run in parallel with the layout load, so the layout guard alone does not protect page data.
+  requireAdmin(locals);
   const data = await getSeasonData();
   const now = new Date();
   return {

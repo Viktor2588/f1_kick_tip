@@ -11,7 +11,8 @@ function roundParam(raw: string) {
   return round;
 }
 
-export async function load({ params }) {
+export async function load({ params, locals }) {
+  requireAdmin(locals); // see admin/+page.server.ts
   const data = await getSeasonData();
   const round = roundParam(params.round);
   const race = data.races.find(r => r.round === round);
