@@ -1,188 +1,65 @@
-# F1 Kick Tip 2026
+# F1 Kick Tip
 
-Tippspiel für die Formel-1-Saison 2026. Thomas, Julia und Viktor tippen vor jedem Rennen und vergleichen ihre Vorhersagen.
+Private Formel-1-Tippspiel für Thomas, Julia und Viktor. Vor jedem Rennen (und Sprint) tippt jeder Sieger,
+Podium, Pole, schnellste Runde, besten Konstrukteur und optional DNF/DNS; einmal pro Saison Weltmeister und
+Konstrukteurs-Weltmeister. Die Regeln stehen in der App unter **Regeln**.
 
-## Mitspielen
+This is the rebuilt version (SvelteKit + Postgres). The original static app is kept in `legacy/` as reference.
 
-### Renntipps abgeben
-
-1. Öffne `data/predictions.json`
-2. Finde die aktuelle Runde (z.B. `"1"` für Runde 1)
-3. Trage deinen Tipp ein (verwende die IDs aus `data/season.json`):
-
-```json
-{
-  "predictions": {
-    "1": {
-      "thomas": {
-        "winner": "verstappen",
-        "podium": ["verstappen", "norris", "leclerc"],
-        "pole": "verstappen",
-        "fastestLap": "norris",
-        "bestConstructor": "mclaren",
-        "submittedAt": "2026-03-07T10:00:00Z"
-      }
-    }
-  }
-}
-```
-
-4. Committe und pushe **vor dem Rennstart**
-
-### Sprint-Tipps (6 Runden)
-
-Bei Sprint-Wochenenden zusätzlich `data/sprint-predictions.json` editieren:
-
-```json
-{
-  "sprintPredictions": {
-    "2": {
-      "thomas": {
-        "winner": "norris",
-        "podium": ["norris", "verstappen", "piastri"],
-        "submittedAt": "2026-03-14T08:00:00Z"
-      }
-    }
-  }
-}
-```
-
-Sprint-Tipps müssen **vor dem Sprint-Start** abgegeben werden.
-
-### Saison-Tipps (einmalig vor Runde 1)
-
-Editiere `data/season-predictions.json` **vor dem Start von Runde 1**:
-
-```json
-{
-  "seasonPredictions": {
-    "thomas": {
-      "wdc": "verstappen",
-      "wcc": "mclaren",
-      "submittedAt": "2026-03-01T12:00:00Z"
-    }
-  }
-}
-```
-
-## Ergebnisse eintragen
-
-Nach dem Rennen trägt jemand die Ergebnisse in `data/results.json` ein:
-
-```json
-{
-  "results": {
-    "1": {
-      "winner": "verstappen",
-      "podium": ["verstappen", "norris", "hamilton"],
-      "pole": "verstappen",
-      "fastestLap": "norris",
-      "bestConstructor": "mclaren",
-      "enteredAt": "2026-03-08T07:30:00Z"
-    }
-  }
-}
-```
-
-Sprint-Ergebnisse kommen in `data/sprint-results.json`.
-
-## Deadlines
-
-| Tipp-Art | Deadline |
-|---|---|
-| Renntipps | Vor Rennstart (`raceStartUTC`) |
-| Sprint-Tipps | Vor Sprint-Start (`sprintStartUTC`) |
-| Saison-Tipps | Vor Runde 1 |
-
-Verspätete Tipps (`submittedAt` nach Deadline) = **0 Punkte**.
-
-## Punktesystem
-
-### Hauptrennen (max. 21 Punkte)
-
-| Kategorie | Punkte |
-|---|---|
-| Rennsieger richtig (= Podium P1) | 3 |
-| Podium P2 exakt | 2 |
-| Podium P3 exakt | 2 |
-| Podium-Bonus (Fahrer auf dem Podium, aber falsche Position) | 1 je |
-| Pole Position | 3 |
-| Schnellste Runde | 3 |
-| Bester Konstrukteur | 3 |
-| Perfekte Runde (alles richtig) | 5 Bonus |
-
-Der Rennsieger ist automatisch Podium P1. Deshalb gibt es keinen separaten P1-Tipp neben dem Sieger-Tipp.
-
-Der Podium-Bonus gilt für **P1, P2 und P3**: Wenn dein getippter Fahrer auf dem Podium landet, aber auf einer anderen der drei Positionen, bekommst du **1 Punkt**.
-
-### Sprint (max. 7 Punkte)
-
-| Kategorie | Punkte |
-|---|---|
-| Sprint-Sieger | 3 |
-| Sprint P2 exakt | 1 |
-| Sprint P3 exakt | 1 |
-| Sprint Podium-Bonus | 1 je |
-| Perfekter Sprint | 2 Bonus |
-
-### Saison-Tipps
-
-| Kategorie | Punkte |
-|---|---|
-| Weltmeister (WDC) | 20 |
-| Konstrukteurs-WM (WCC) | 15 |
-
-**Tiebreaker**: Sieger-Tipps > Perfekte Runden > Pole-Tipps
-
-## Regression-Check
-
-Für schnelle Regeln-/Scoring-Checks gibt es `test-scoring.html`. Die Seite führt definierte Scoring-Szenarien automatisch im Browser aus, inklusive der Podium-Bonus-Fälle rund um **P1 ↔ P2/P3**.
-
-## Fahrer-IDs
-
-| Fahrer | ID | Team |
-|---|---|---|
-| Lando Norris | `norris` | McLaren |
-| Oscar Piastri | `piastri` | McLaren |
-| Charles Leclerc | `leclerc` | Ferrari |
-| Lewis Hamilton | `hamilton` | Ferrari |
-| Max Verstappen | `verstappen` | Red Bull |
-| Isack Hadjar | `hadjar` | Red Bull |
-| George Russell | `russell` | Mercedes |
-| Kimi Antonelli | `antonelli` | Mercedes |
-| Fernando Alonso | `alonso` | Aston Martin |
-| Lance Stroll | `stroll` | Aston Martin |
-| Alex Albon | `albon` | Williams |
-| Carlos Sainz | `sainz` | Williams |
-| Liam Lawson | `lawson` | Racing Bulls |
-| Arvid Lindblad | `lindblad` | Racing Bulls |
-| Esteban Ocon | `ocon` | Haas |
-| Oliver Bearman | `bearman` | Haas |
-| Nico Hülkenberg | `hulkenberg` | Audi |
-| Gabriel Bortoleto | `bortoleto` | Audi |
-| Pierre Gasly | `gasly` | Alpine |
-| Franco Colapinto | `colapinto` | Alpine |
-| Valtteri Bottas | `bottas` | Cadillac |
-| Sergio Perez | `perez` | Cadillac |
-
-## Team-IDs
-
-`mclaren`, `ferrari`, `redbull`, `mercedes`, `astonmartin`, `williams`, `racingbulls`, `haas`, `audi`, `alpine`, `cadillac`
-
-## Lokale Vorschau
-
-Einfach einen lokalen Webserver starten:
+## Run locally
 
 ```bash
-# Python
-python3 -m http.server 8000
-
-# Node.js
-npx serve .
+npm install
+npm run dev          # http://localhost:5173
 ```
 
-Dann `http://localhost:8000` im Browser öffnen.
+That's all: data lives in an embedded Postgres (PGlite) in `.data/pglite`, created and filled on first start with
+the 2026 calendar, teams, drivers and players (`legacy/data/season.json`) plus tips and results:
 
-## Sprint-Wochenenden 2026
+- the real data, if `LIVE_EXPORT=/path/to/live-export.json` points to an export of the old database, or
+- otherwise the old demo data (`legacy/data/test`).
 
-Runde 2 (China), 6 (Miami), 7 (Kanada), 11 (Großbritannien), 14 (Niederlande), 18 (Singapur)
+To start over, stop the server and delete `.data/`. Sign in locally with `/dev/login/<thomas|julia|viktor>`
+(only in `npm run dev`).
+
+## Test
+
+```bash
+npm test             # scoring rules, parity with legacy/js/scoring.js, import, tips, results, secrecy
+npm run check        # type check
+```
+
+The parity tests run the old `legacy/js/scoring.js` and the new `src/lib/scoring.ts` side by side (20,000 random
+cases, random seasons, demo data) and must give identical points and standings. With `LIVE_EXPORT` set they
+also compare the real season through the new database.
+
+## How it works
+
+| Where | What |
+|---|---|
+| `src/lib/scoring.ts` | The rules. Points are always calculated, never stored. |
+| `src/lib/server/db/` | Schema, import of legacy data, seeding |
+| `src/lib/server/views.ts` | Page data. Other players' tips stay on the server until the deadline. |
+| `src/lib/server/tips.ts`, `results.ts` | Saving tips/results; the server enforces deadlines and stamps times |
+| `src/lib/server/auth.ts` | Personal login links; only hashes of tokens are stored |
+| `src/routes/` | Pages: Übersicht, Rennen, Saison, Statistik, Regeln, Admin; `/kalender.ics` feed |
+
+- **Login:** the admin creates a personal link per player (Admin → Login-Links). Opening it once signs the player in
+  for 180 days. A new link signs that player out everywhere.
+- **Admin:** players with `is_admin` (Viktor by default) enter results, issue links and set the champions.
+- **Calendar:** `/kalender.ics` lists every tip deadline with a reminder 2 hours before.
+
+## Deploy (not done yet — needs Viktor's OK)
+
+Proposed: Vercel Hobby or any Node host + a **new** Neon Postgres database. Steps are in the cut-over plan
+(`~/.openrig/workspace/missions/f1-kick-tip-rebuild/CUTOVER.md`). Notes:
+
+- Database credentials only as server environment variables, never in the code.
+- adapter-node needs `ORIGIN=https://<your-domain>` (or PROTOCOL/HOST headers), otherwise form posts are rejected.
+- The Neon driver for production is not wired up yet (local PGlite only); it is a small change in
+  `src/lib/server/db/index.ts` at cut-over.
+
+## Update-Nachricht
+
+The repo rule in `CLAUDE.md` (replace `LATEST_UPDATE` in `js/app.js` before each push) belongs to the legacy app.
+When the rebuild ships, the update notice moves into the new app; until then it does not apply to this branch.

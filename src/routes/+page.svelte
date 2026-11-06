@@ -36,7 +36,7 @@
   <section>
     <div class="section-head">
       <h2>Tabelle</h2>
-      <span class="muted small">{dash.completed}/{dash.totalRaces} Rennen</span>
+      <span class="muted small">{dash.completed}/{dash.totalRaces} Rennen · <a href="/statistik" class="stat-link">Statistik</a></span>
     </div>
     <div class="card table">
       {#each table.rows as row}
@@ -125,6 +125,7 @@
   .stats { display: flex; flex-wrap: wrap; gap: 2px 12px; }
   .stats b { color: var(--text); }
   .move { font-size: 0.72rem; font-weight: 700; }
+  .stat-link { color: var(--accent-text); font-weight: 600; }
   .move.up { color: var(--good); }
   .move.down { color: var(--bad); }
   .pts { text-align: right; }
