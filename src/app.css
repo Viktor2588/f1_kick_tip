@@ -1,0 +1,135 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b0c10;
+  --surface: #15171f;
+  --surface-2: #1d2030;
+  --surface-3: #262a3d;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --text: #f3f4f8;
+  --text-2: #b4b8c7;
+  --text-3: #8c91a5;
+  --accent: #e10600;
+  --accent-text: #ff5a52;
+  --on-accent: #fff;
+  --good: #34d399;
+  --good-bg: rgba(52, 211, 153, 0.14);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.14);
+  --bad: #ff6b6b;
+  --bad-bg: rgba(255, 107, 107, 0.12);
+  --info: #60c5ff;
+  --info-bg: rgba(96, 197, 255, 0.14);
+  --gold: #ffcc33;
+  --gold-bg: rgba(255, 204, 51, 0.16);
+  --sprint: #ff8c00;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --nav-h: 64px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Titillium Web', system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg: #f3f4f7;
+    --surface: #ffffff;
+    --surface-2: #f1f2f6;
+    --surface-3: #e6e8ef;
+    --line: rgba(16, 20, 40, 0.09);
+    --line-strong: rgba(16, 20, 40, 0.18);
+    --text: #11131a;
+    --text-2: #444a5c;
+    --text-3: #5f6577;
+    --accent: #d10500;
+    --accent-text: #b50400;
+    --good: #0b7a42;
+    --good-bg: rgba(11, 122, 66, 0.1);
+    --warn: #8f5400;
+    --warn-bg: rgba(143, 84, 0, 0.1);
+    --bad: #c42727;
+    --bad-bg: rgba(196, 39, 39, 0.08);
+    --info: #0a62a0;
+    --info-bg: rgba(10, 98, 160, 0.1);
+    --gold: #8c6100;
+    --gold-bg: rgba(200, 150, 0, 0.16);
+    --shadow: 0 10px 30px rgba(16, 20, 40, 0.1);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; border-radius: 6px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing: -0.01em; }
+h1 { font-size: 1.75rem; font-weight: 900; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+.muted { color: var(--text-3); }
+.small { font-size: 0.85rem; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+.wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+.stack > * + * { margin-top: 28px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.section-head a { color: var(--accent-text); font-size: 0.9rem; font-weight: 600; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.chip.sprint { background: var(--sprint); color: #1a1100; }
+.chip.open { background: var(--good-bg); color: var(--good); }
+.chip.locked { background: var(--warn-bg); color: var(--warn); }
+.chip.finished { background: var(--info-bg); color: var(--info); }
+.chip.late { background: var(--bad-bg); color: var(--bad); }
+.chip.gold { background: var(--gold-bg); color: var(--gold); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.ghost { background: var(--surface-2); border-color: var(--line-strong); }
+
+.team-bar { display: inline-block; width: 4px; height: 1.1em; border-radius: 2px; vertical-align: -0.15em; margin-right: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

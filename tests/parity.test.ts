@@ -2,7 +2,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-// @ts-expect-error legacy JS module without types
 import * as legacy from '../legacy/js/scoring.js';
 import * as next from '../src/lib/scoring';
 import { legacyToGame, type LegacyData } from '../src/lib/legacy-format';
@@ -22,7 +21,7 @@ const TEAMS = ['mclaren', 'ferrari', 'redbull', 'mercedes'];
 
 function gen(r: () => number) {
   const pick = <T,>(xs: T[]) => xs[Math.floor(r() * xs.length)];
-  const maybe = <T,>(v: T, empty: unknown = undefined) => (r() < 0.12 ? (r() < 0.5 ? empty : '') : v);
+  const maybe = <T,>(v: T): T | '' | undefined => (r() < 0.12 ? (r() < 0.5 ? undefined : '') : v);
   const podium = () => {
     const a = [...DRIVERS].sort(() => r() - 0.5).slice(0, 3) as (string | undefined | null)[];
     if (r() < 0.1) a[1] = undefined;
@@ -89,7 +88,7 @@ describe('scoring parity with legacy/js/scoring.js', () => {
 
   it('standings, tiebreakers and accuracy match on random full seasons', () => {
     const r = rng(7);
-    const season = JSON.parse(readFileSync(join(__dirname, '../legacy/data/season.json'), 'utf8'));
+    const season = JSON.parse(readFileSync(join(import.meta.dirname, '../legacy/data/season.json'), 'utf8'));
     for (let s = 0; s < 40; s++) {
       const data: LegacyData = { season, predictions: { predictions: {} }, sprintPredictions: { sprintPredictions: {} }, seasonPredictions: { seasonPredictions: {} }, results: { results: {} }, sprintResults: { sprintResults: {} } };
       const playedRounds = Math.floor(r() * 24);
@@ -120,7 +119,7 @@ describe('scoring parity with legacy/js/scoring.js', () => {
   });
 
   it('legacy demo data (legacy/data/test) gives identical standings', () => {
-    const dir = join(__dirname, '../legacy/data/test');
+    const dir = join(import.meta.dirname, '../legacy/data/test');
     const load = (f: string) => JSON.parse(readFileSync(join(dir, f), 'utf8'));
     const data: LegacyData = {
       season: load('season.json'), predictions: load('predictions.json'), sprintPredictions: load('sprint-predictions.json'),
@@ -133,7 +132,7 @@ describe('scoring parity with legacy/js/scoring.js', () => {
   });
 
   // Runs once Viktor has allowed the read-only export (private/live-export.json, never committed).
-  const exportPath = join(__dirname, '../private/live-export.json');
+  const exportPath = join(import.meta.dirname, '../private/live-export.json');
   it.skipIf(!existsSync(exportPath))('real 2026 export gives identical standings', () => {
     const data: LegacyData = JSON.parse(readFileSync(exportPath, 'utf8'));
     const old = legacy.calculateStandings(data.season, data.predictions, data.sprintPredictions, data.results, data.sprintResults, data.seasonPredictions, null);
