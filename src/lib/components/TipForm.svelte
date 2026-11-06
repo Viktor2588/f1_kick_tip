@@ -80,7 +80,14 @@
 <form
   method="POST"
   action="?/{kind}"
-  use:enhance={() => {
+  use:enhance={({ cancel }) => {
+    if (!complete) {
+      // enhance submits regardless of preventDefault, so the client-side check cancels here
+      cancel();
+      localError = 'Bitte P1, P2 und P3 wählen.';
+      openKey = cats.find(c => c.required && !values[c.key])?.key ?? null;
+      return;
+    }
     saving = true;
     return async ({ result, update }) => {
       saving = false;
@@ -88,7 +95,6 @@
       await update({ reset: false, invalidateAll: false });
     };
   }}
-  onsubmit={e => { if (!complete) { e.preventDefault(); localError = 'Bitte P1, P2 und P3 wählen.'; openKey = cats.find(c => c.required && !values[c.key])?.key ?? null; } }}
 >
   {#each cats as cat}<input type="hidden" name={cat.key} value={values[cat.key]} />{/each}
 
@@ -97,7 +103,7 @@
       {@const isOpen = openKey === cat.key}
       <li class:open={isOpen}>
         <button type="button" class="cat" aria-expanded={isOpen} onclick={() => (openKey = isOpen ? null : cat.key)}>
-          <span class="cat-label">{cat.label}{#if !cat.required}<span class="opt"> · optional</span>{/if}</span>
+          <span class="cat-label">{cat.label}{#if !cat.required}<span class="opt">&nbsp;· optional</span>{/if}</span>
           {#if label(cat)}
             <span class="chosen"><span class="team-bar" style:background={color(cat)}></span>{label(cat)}</span>
           {:else}

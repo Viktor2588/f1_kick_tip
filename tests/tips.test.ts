@@ -30,10 +30,15 @@ describe('personal login links', () => {
 
     const second = await issueLoginToken(db, 'julia');
     expect(await loginWithToken(db, first)).toBeNull();
+    // review F1: sessions opened with the old link end too
+    expect(await playerForSession(db, s1!.sessionToken)).toBeNull();
     expect((await loginWithToken(db, second))?.playerId).toBe('julia');
 
-    await endSession(db, s1!.sessionToken);
-    expect(await playerForSession(db, s1!.sessionToken)).toBeNull();
+    const s2 = await loginWithToken(db, second);
+    await issueLoginToken(db, 'thomas'); // another player's new link does not touch Julia
+    expect((await playerForSession(db, s2!.sessionToken))?.name).toBe('Julia');
+    await endSession(db, s2!.sessionToken);
+    expect(await playerForSession(db, s2!.sessionToken)).toBeNull();
     expect(await loginWithToken(db, 'not-a-valid-token-at-all-xxxxx')).toBeNull();
     await expect(issueLoginToken(db, 'nobody')).rejects.toThrow();
   });

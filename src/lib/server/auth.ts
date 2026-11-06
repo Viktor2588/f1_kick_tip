@@ -11,11 +11,16 @@ export const SESSION_DAYS = 180;
 const hash = (token: string) => createHash('sha256').update(token).digest('hex');
 const newToken = () => randomBytes(32).toString('base64url');
 
-/** Creates (or replaces) a player's personal login token and returns the raw token. */
+/**
+ * Creates (or replaces) a player's personal login token and returns the raw token.
+ * A new link is issued when the old one leaked or a phone changed, so it also signs out every
+ * session that was opened with an earlier link.
+ */
 export async function issueLoginToken(db: Db, playerId: string): Promise<string> {
   const token = newToken();
   const updated = await db.update(t.players).set({ loginTokenHash: hash(token) }).where(eq(t.players.id, playerId)).returning({ id: t.players.id });
   if (updated.length === 0) throw new Error(`Unknown player: ${playerId}`);
+  await db.delete(t.sessions).where(eq(t.sessions.playerId, playerId));
   return token;
 }
 
