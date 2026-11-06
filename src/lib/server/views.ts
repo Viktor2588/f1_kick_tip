@@ -117,7 +117,7 @@ export function calendarView(data: SeasonData, now = new Date()) {
 type TipCell = { value: string | null; verdict: 'correct' | 'partial' | 'wrong' | null; late: boolean } | { hidden: true } | null;
 
 /** Race detail. Tip contents are only included once the respective deadline has passed. */
-export function raceView(data: SeasonData, round: number, now = new Date()) {
+export function raceView(data: SeasonData, round: number, now = new Date(), viewerId: string | null = null) {
   const race = data.races.find(r => r.round === round);
   if (!race) return null;
   const { game } = data;
@@ -141,7 +141,7 @@ export function raceView(data: SeasonData, round: number, now = new Date()) {
   function raceCell(playerId: string, key: (typeof raceCategories)[number]['key']): TipCell {
     const tip = game.raceTips[round]?.[playerId];
     if (!tip) return null;
-    if (!raceRevealed) return { hidden: true };
+    if (!raceRevealed && playerId !== viewerId) return { hidden: true };
     const value =
       key === 'winner' ? tip.winner : key === 'p2' ? tip.podium?.[1] : key === 'p3' ? tip.podium?.[2] : (tip as Record<string, string | null | undefined>)[key];
     const late = !!tip.submittedAt && new Date(tip.submittedAt) > new Date(race!.raceStartUTC);
@@ -163,7 +163,7 @@ export function raceView(data: SeasonData, round: number, now = new Date()) {
   function sprintCell(playerId: string, idx: number): TipCell {
     const tip = game.sprintTips[round]?.[playerId];
     if (!tip) return null;
-    if (!sprintRevealed) return { hidden: true };
+    if (!sprintRevealed && playerId !== viewerId) return { hidden: true };
     const value = idx === 0 ? tip.winner : tip.podium?.[idx];
     const late = !!tip.submittedAt && !!race!.sprintStartUTC && new Date(tip.submittedAt) > new Date(race!.sprintStartUTC);
     let verdict: 'correct' | 'partial' | 'wrong' | null = null;
@@ -182,10 +182,19 @@ export function raceView(data: SeasonData, round: number, now = new Date()) {
     return { player: p, raceScore, sprintScore, total: (raceScore?.total ?? 0) + (sprintScore?.total ?? 0) };
   });
 
+  const ownRaceTip = viewerId ? game.raceTips[round]?.[viewerId] ?? null : null;
+  const ownSprintTip = viewerId ? game.sprintTips[round]?.[viewerId] ?? null : null;
+
   return {
     race,
     status,
     sprintStatus,
+    own: viewerId
+      ? {
+          race: ownRaceTip ? { winner: ownRaceTip.winner ?? '', p2: ownRaceTip.podium?.[1] ?? '', p3: ownRaceTip.podium?.[2] ?? '', pole: ownRaceTip.pole ?? '', fastestLap: ownRaceTip.fastestLap ?? '', bestConstructor: ownRaceTip.bestConstructor ?? '', dnf: ownRaceTip.dnf ?? '', dns: ownRaceTip.dns ?? '', submittedAt: ownRaceTip.submittedAt ?? null } : null,
+          sprint: ownSprintTip ? { winner: ownSprintTip.winner ?? '', p2: ownSprintTip.podium?.[1] ?? '', p3: ownSprintTip.podium?.[2] ?? '', submittedAt: ownSprintTip.submittedAt ?? null } : null,
+        }
+      : null,
     result,
     sprintResult,
     raceRevealed,

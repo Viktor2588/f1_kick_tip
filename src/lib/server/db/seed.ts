@@ -4,7 +4,8 @@
 //   otherwise the old demo data (legacy/data/test) so the app has something to show.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
+import { players } from './schema';
 import type { Db } from './index';
 import { importLegacyRows, importSeason, legacyDataToRows, type LegacyRows } from './import';
 import type { LegacyData, LegacySeasonFile } from '$lib/legacy-format';
@@ -36,6 +37,8 @@ export async function ensureSeeded(db: Db): Promise<'existing' | 'live-export' |
 
   const season = seasonFile();
   await importSeason(db, season);
+  // Viktor owns the game and enters results (admin). Change in the players table if needed.
+  await db.update(players).set({ isAdmin: true }).where(eq(players.id, 'viktor'));
   if (existsSync(join(root, LIVE_EXPORT))) {
     const rowsExport: LegacyRows = readJson(LIVE_EXPORT);
     await importLegacyRows(db, season.season, rowsExport);

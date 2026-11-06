@@ -25,6 +25,9 @@
     <div class="me">
       {#if data.me}
         <span class="who">{data.me.name}</span>
+        <form method="POST" action="/abmelden"><button class="out small" type="submit">Abmelden</button></form>
+      {:else}
+        <a class="in small" href="/anmelden">Anmelden</a>
       {/if}
     </div>
   </div>
@@ -51,6 +54,8 @@
   .yr { color: var(--text-3); font-weight: 700; }
   .me { display: flex; align-items: center; gap: 8px; }
   .who { font-weight: 600; font-size: 0.9rem; }
+  .out { background: none; border: 0; color: var(--text-3); text-decoration: underline; }
+  .in { color: var(--accent-text); font-weight: 700; }
 
   .links {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;

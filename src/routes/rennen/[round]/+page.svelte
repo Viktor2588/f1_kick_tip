@@ -1,9 +1,13 @@
 <script lang="ts">
   import Countdown from '$lib/components/Countdown.svelte';
   import Driver from '$lib/components/Driver.svelte';
+  import TipForm from '$lib/components/TipForm.svelte';
   import { flag, fmtDate, fmtDateTime } from '$lib/race';
 
-  let { data } = $props();
+  let { data, form } = $props();
+  const drivers = $derived(Object.values(data.meta.drivers) as import('$lib/types').Driver[]);
+  const teams = $derived(Object.values(data.meta.teams) as import('$lib/types').Team[]);
+  const fb = (kind: 'race' | 'sprint') => (form?.form === kind ? form : null);
   const v = $derived(data.view);
   const players = $derived(data.meta.players);
   const statusLabel = { open: 'Tipps offen', locked: 'Tipps geschlossen', finished: 'Gewertet' } as const;
@@ -38,6 +42,27 @@
         <div class="small sprint-dl">Sprint-Tipps bis {fmtDateTime(v.race.sprintStartUTC)} Uhr · <Countdown target={v.race.sprintStartUTC} compact /></div>
       {/if}
     </section>
+  {/if}
+
+  {#if v.status === 'open' || v.sprintStatus === 'open'}
+    {#if !data.me}
+      <section class="card login">
+        <b>Tippen?</b> Öffne deinen persönlichen Link, dann kannst du hier tippen. <a href="/anmelden">Wie geht das?</a>
+      </section>
+    {:else}
+      {#if v.sprintStatus === 'open'}
+        <section>
+          <h2 class="h">Dein Sprint-Tipp <span class="chip sprint">Sprint</span></h2>
+          <TipForm kind="sprint" initial={v.own?.sprint ?? null} {drivers} {teams} feedback={fb('sprint')} />
+        </section>
+      {/if}
+      {#if v.status === 'open'}
+        <section>
+          <h2 class="h">Dein Tipp</h2>
+          <TipForm kind="race" initial={v.own?.race ?? null} {drivers} {teams} feedback={fb('race')} />
+        </section>
+      {/if}
+    {/if}
   {/if}
 
   {#if v.result}
@@ -174,6 +199,7 @@
   .h { margin-bottom: 10px; }
   .deadline { display: grid; gap: 10px; background: linear-gradient(135deg, #e10600, #8e0400); color: #fff; border: 0; }
   .sprint-dl { opacity: 0.95; }
+  .login a { color: var(--accent-text); font-weight: 600; }
 
   .podium { list-style: none; display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: end; gap: 6px; }
   .podium li { background: var(--surface-2); border-radius: 12px 12px 4px 4px; padding: 10px 6px; text-align: center; font-weight: 700; font-size: 0.85rem; display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }

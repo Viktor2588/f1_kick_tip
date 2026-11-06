@@ -1,7 +1,9 @@
 import type { Handle } from '@sveltejs/kit';
+import { getDb } from '$lib/server/db';
+import { playerForSession, SESSION_COOKIE } from '$lib/server/auth';
 
-// Login comes in slice 3. Until then nobody is signed in.
 export const handle: Handle = async ({ event, resolve }) => {
-  event.locals.player = null;
+  const token = event.cookies.get(SESSION_COOKIE);
+  event.locals.player = token ? await playerForSession(await getDb(), token) : null;
   return resolve(event);
 };

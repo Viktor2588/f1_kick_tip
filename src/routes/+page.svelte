@@ -7,6 +7,7 @@
   let { data } = $props();
   const dash = $derived(data.dash);
   const table = $derived(data.table);
+  const myTip = $derived(!!data.me && !!dash.tipStatus.find(t => t.player.id === data.me?.id)?.race);
 </script>
 
 <svelte:head><title>F1 Kick Tip {data.meta.year}</title></svelte:head>
@@ -26,7 +27,7 @@
           </span>
         {/each}
       </div>
-      <span class="cta">Zum Rennen →</span>
+      <span class="cta">{dash.next.status === 'open' && data.me ? (myTip ? 'Tipp ansehen / ändern' : 'Jetzt tippen') : 'Zum Rennen'} →</span>
     </a>
   {:else}
     <div class="card"><h2>Saison abgeschlossen</h2></div>
