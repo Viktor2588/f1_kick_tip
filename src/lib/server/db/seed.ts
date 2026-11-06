@@ -3,7 +3,7 @@
 // - Tips/results: the real export if present (private/live-export.json, never in git),
 //   otherwise the old demo data (legacy/data/test) so the app has something to show.
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { eq, sql } from 'drizzle-orm';
 import { players } from './schema';
 import type { Db } from './index';
@@ -29,7 +29,8 @@ export function demoData(): LegacyData {
   };
 }
 
-export const LIVE_EXPORT = 'private/live-export.json';
+/** Real data export (raw legacy rows). Kept outside git; point to it with LIVE_EXPORT=/path/to/live-export.json. */
+export const LIVE_EXPORT = process.env.LIVE_EXPORT || 'private/live-export.json';
 
 export async function ensureSeeded(db: Db): Promise<'existing' | 'live-export' | 'demo'> {
   const { rows } = await db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM seasons`);
@@ -39,8 +40,8 @@ export async function ensureSeeded(db: Db): Promise<'existing' | 'live-export' |
   await importSeason(db, season);
   // Viktor owns the game and enters results (admin). Change in the players table if needed.
   await db.update(players).set({ isAdmin: true }).where(eq(players.id, 'viktor'));
-  if (existsSync(join(root, LIVE_EXPORT))) {
-    const rowsExport: LegacyRows = readJson(LIVE_EXPORT);
+  if (existsSync(resolve(root, LIVE_EXPORT))) {
+    const rowsExport: LegacyRows = JSON.parse(readFileSync(resolve(root, LIVE_EXPORT), 'utf8'));
     await importLegacyRows(db, season.season, rowsExport);
     return 'live-export';
   }

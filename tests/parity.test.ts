@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import * as legacy from '../legacy/js/scoring.js';
 import * as next from '../src/lib/scoring';
 import { legacyToGame, type LegacyData } from '../src/lib/legacy-format';
+import { legacyRowsToLegacyData } from '../src/lib/server/db/import';
 
 // Small deterministic PRNG so failures are reproducible.
 function rng(seed: number) {
@@ -132,9 +133,10 @@ describe('scoring parity with legacy/js/scoring.js', () => {
   });
 
   // Runs once Viktor has allowed the read-only export (private/live-export.json, never committed).
-  const exportPath = join(import.meta.dirname, '../private/live-export.json');
+  const exportPath = process.env.LIVE_EXPORT || join(import.meta.dirname, '../private/live-export.json');
   it.skipIf(!existsSync(exportPath))('real 2026 export gives identical standings', () => {
-    const data: LegacyData = JSON.parse(readFileSync(exportPath, 'utf8'));
+    const season = JSON.parse(readFileSync(join(import.meta.dirname, '../legacy/data/season.json'), 'utf8'));
+    const data: LegacyData = legacyRowsToLegacyData(season, JSON.parse(readFileSync(exportPath, 'utf8')));
     const old = legacy.calculateStandings(data.season, data.predictions, data.sprintPredictions, data.results, data.sprintResults, data.seasonPredictions, null);
     expect(next.calculateStandings(legacyToGame(data))).toEqual(old);
   });
