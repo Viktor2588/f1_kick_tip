@@ -4,11 +4,13 @@
 
   let { children, data } = $props();
 
-  const nav = [
+  const nav = $derived([
     { href: '/', label: 'Übersicht', icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
     { href: '/rennen', label: 'Rennen', icon: 'M4 21V4M4 4h12l-2 4 2 4H4' },
+    { href: '/saison', label: 'Saison', icon: 'M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 3M17 6h3a3 3 0 0 1-3 3' },
     { href: '/regeln', label: 'Regeln', icon: 'M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4zM9 9h6M9 13h6' },
-  ];
+    ...(data.me?.isAdmin ? [{ href: '/admin', label: 'Admin', icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1' }] : []),
+  ]);
   const active = (href: string) => (href === '/' ? page.url.pathname === '/' : page.url.pathname.startsWith(href));
 </script>
 
