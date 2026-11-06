@@ -76,11 +76,54 @@ export function renderDashboard(data) {
     season, predictions, sprintPredictions, results, sprintResults, seasonPredictions, null
   );
 
+  renderNextRace(season, results);
   renderLeaderboard(season, standings);
   renderTipStatus(season, predictions, sprintPredictions, seasonPredictions, results);
   renderRecentResults(season, predictions, results, standings, data);
   renderCalendar(season, results);
   renderSeasonTips(season, seasonPredictions, results);
+}
+
+function renderNextRace(season, results) {
+  const container = document.getElementById('next-race');
+  if (!container) return;
+
+  const next = getNextRace(season, results);
+  if (!next) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const isTest = !!document.body.dataset.basePath;
+  const racePageUrl = isTest ? 'test-rennen.html' : 'rennen.html';
+  const open = getDeadlineStatus(next, results) === 'open';
+
+  container.innerHTML = `
+    <a href="${racePageUrl}?runde=${next.round}" class="next-race-card">
+      <div class="next-race-eyebrow">
+        <span>N\u00e4chstes Rennen \u00b7 Runde ${next.round}</span>
+        ${next.sprint ? '<span class="sprint-badge">Sprint</span>' : ''}
+      </div>
+      <div class="next-race-title">${countryFlag(next.countryCode)} ${next.name}</div>
+      <div class="next-race-meta">${next.circuit} \u2022 ${formatDateTime(next.raceStartUTC)}</div>
+      <div class="next-race-countdown" aria-label="Zeit bis Rennstart"></div>
+      <span class="next-race-cta">${open ? 'Jetzt tippen' : 'Zum Rennen'} \u2192</span>
+    </a>
+  `;
+
+  const timer = container.querySelector('.next-race-countdown');
+  function update() {
+    const cd = countdown(next.raceStartUTC);
+    if (cd.expired) {
+      timer.innerHTML = '<div style="grid-column: 1 / -1"><strong>L\u00e4uft!</strong></div>';
+      return;
+    }
+    timer.innerHTML = [
+      [cd.days, 'Tage'], [pad(cd.hours), 'Std'], [pad(cd.minutes), 'Min'], [pad(cd.seconds), 'Sek'],
+    ].map(([v, l]) => `<div><strong>${v}</strong><span>${l}</span></div>`).join('');
+  }
+  update();
+  setInterval(update, 1000);
 }
 
 function renderLeaderboard(season, standings) {
@@ -318,8 +361,8 @@ function renderSeasonTips(season, seasonPredictions, results) {
             <div class="player-name">${player.emoji} ${player.name}</div>
             <div class="mt-md">
               <div class="season-tip-label">Weltmeister (WDC)</div>
-              <div class="season-tip-value" style="color: ${teamColorForDriver(season, pred.wdc)}">
-                ${driverName(season, pred.wdc)}
+              <div class="season-tip-value">
+                <span class="team-dot" style="background: ${teamColorForDriver(season, pred.wdc)}"></span>${driverName(season, pred.wdc)}
               </div>
             </div>
             <div class="mt-md">
@@ -553,7 +596,7 @@ function renderRacePredictions(season, race, predictions, results) {
         }
       }
 
-      html += `<td class="${cssClass}">${value}${icon}</td>`;
+      html += `<td class="${cssClass}" data-label="${player.emoji} ${player.name}">${value}${icon}</td>`;
     }
 
     if (result) {
@@ -563,7 +606,7 @@ function renderRacePredictions(season, race, predictions, results) {
       else if (cat.key === 'bestConstructor') resultValue = result[cat.key] ? teamName(season, result[cat.key]) : '-';
       else if (cat.key === 'dnf' || cat.key === 'dns') resultValue = result[cat.key]?.length ? result[cat.key].map(id => driverLastName(season, id)).join(', ') : '-';
       else resultValue = result[cat.key] ? driverLastName(season, result[cat.key]) : '-';
-      html += `<td class="fw-bold">${resultValue}</td>`;
+      html += `<td class="fw-bold" data-label="Ergebnis">${resultValue}</td>`;
     }
 
     html += '</tr>';
@@ -683,7 +726,7 @@ function renderSprintPredictions(season, race, sprintPredictions, sprintResults)
         }
       }
 
-      html += `<td class="${cssClass}">${value}${icon}</td>`;
+      html += `<td class="${cssClass}" data-label="${player.emoji} ${player.name}">${value}${icon}</td>`;
     }
 
     if (result) {
@@ -691,7 +734,7 @@ function renderSprintPredictions(season, race, sprintPredictions, sprintResults)
       if (cat.key === 'winner') resDriver = result.winner ? driverLastName(season, result.winner) : '-';
       else if (cat.key === 'podium-2') resDriver = result.podium?.[1] ? driverLastName(season, result.podium[1]) : '-';
       else if (cat.key === 'podium-3') resDriver = result.podium?.[2] ? driverLastName(season, result.podium[2]) : '-';
-      html += `<td class="fw-bold">${resDriver}</td>`;
+      html += `<td class="fw-bold" data-label="Ergebnis">${resDriver}</td>`;
     }
 
     html += '</tr>';
@@ -794,12 +837,14 @@ function renderRacePointsBreakdown(season, race, predictions, results, sprintPre
     const hasPerfect = score?.isPerfect;
 
     html += `
-      <div class="points-breakdown-player card ${hasPerfect ? 'perfect-round' : ''}" data-player="${player.id}">
-        <div class="card-header">
+      <details class="points-breakdown-player card ${hasPerfect ? 'perfect-round' : ''}" data-player="${player.id}">
+        <summary class="card-header">
           <span class="card-title">${player.emoji} ${player.name}</span>
           ${hasPerfect ? '<span class="perfect-badge">\u2b50 Perfekte Runde!</span>' : ''}
           ${score?.late ? '<span class="late-badge">Verspätet</span>' : ''}
-        </div>
+          <span class="points-summary-total">${grandTotal} Pkt.</span>
+        </summary>
+        <div class="points-breakdown-body">
         ${score && !score.late ? `
         <div class="points-row"><span>Rennsieger (= P1)</span><span class="points-value ${score.breakdown.winner > 0 ? 'positive' : 'zero'}">${score.breakdown.winner}</span></div>
         <div class="points-row"><span>Podium P2</span><span class="points-value ${score.breakdown.podiumP2 > 0 ? 'positive' : 'zero'}">${score.breakdown.podiumP2}</span></div>
@@ -825,18 +870,24 @@ function renderRacePointsBreakdown(season, race, predictions, results, sprintPre
         ` : ''}
 
         <div class="points-total">Gesamt: ${grandTotal} Punkte</div>
-      </div>
+        </div>
+      </details>
     `;
   }
 
   html += '</div>';
   container.innerHTML = html;
+
+  // Expanded on wider screens, collapsed to the totals on phones
+  if (window.matchMedia('(min-width: 768px)').matches) {
+    container.querySelectorAll('details.points-breakdown-player').forEach(d => { d.open = true; });
+  }
 }
 
 // ---- Tip Forms (rennen.html) ----
 
 function tipLabel(text, tooltip) {
-  return `${text} <span class="tip-info">i<span class="tip-tooltip">${tooltip}</span></span>`;
+  return `${text} <span class="tip-info" tabindex="0" role="button">i<span class="tip-tooltip" role="tooltip">${tooltip}</span></span>`;
 }
 
 // Tooltip texts for each tip category
@@ -904,7 +955,7 @@ function driverSearchSelect(season, name, selected, required = false, group = ''
   }).join('');
 
   return `<div class="search-select" id="${id}" data-name="${name}" data-value="${selected || ''}" ${required ? 'data-required="true"' : ''} ${group ? `data-group="${group}"` : ''}>
-    <div class="search-select-trigger">${displayHtml}<span class="ss-arrow">▼</span></div>
+    <div class="search-select-trigger" tabindex="0" role="button" aria-haspopup="listbox">${displayHtml}<span class="ss-arrow" aria-hidden="true">▼</span></div>
     <div class="search-select-dropdown">
       <div class="ss-search"><input type="text" placeholder="Suchen..." autocomplete="off"></div>
       <div class="ss-options">${optionsHtml}</div>
@@ -931,7 +982,7 @@ function teamSearchSelect(season, name, selected, required = false) {
   }).join('');
 
   return `<div class="search-select" id="${id}" data-name="${name}" data-value="${selected || ''}" ${required ? 'data-required="true"' : ''}>
-    <div class="search-select-trigger">${displayHtml}<span class="ss-arrow">▼</span></div>
+    <div class="search-select-trigger" tabindex="0" role="button" aria-haspopup="listbox">${displayHtml}<span class="ss-arrow" aria-hidden="true">▼</span></div>
     <div class="search-select-dropdown">
       <div class="ss-search"><input type="text" placeholder="Suchen..." autocomplete="off"></div>
       <div class="ss-options">${optionsHtml}</div>
@@ -1028,7 +1079,7 @@ function initSearchSelects(container) {
       const nameEl = opt.querySelector('.ss-option-name');
       displayParts.push(nameEl.textContent);
 
-      trigger.innerHTML = `<span class="ss-selected-display">${displayParts.join(' ')}</span><span class="ss-arrow">▼</span>`;
+      trigger.innerHTML = `<span class="ss-selected-display">${displayParts.join(' ')}</span><span class="ss-arrow" aria-hidden="true">▼</span>`;
 
       // Update selected state
       allOptions.forEach(o => o.classList.remove('selected'));
@@ -1042,6 +1093,22 @@ function initSearchSelects(container) {
       e.stopPropagation();
       if (ss.classList.contains('open')) close();
       else open();
+    });
+
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (ss.classList.contains('open')) close();
+        else open();
+      }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { close(); trigger.focus(); }
+      if (e.key === 'Enter') {
+        const first = [...allOptions].find(o => o.style.display !== 'none');
+        if (first) { e.preventDefault(); selectOption(first); trigger.focus(); }
+      }
     });
 
     searchInput.addEventListener('input', () => filterOptions(searchInput.value));
@@ -1408,8 +1475,8 @@ export function renderSeasonPage(data) {
             <div class="player-name" style="justify-content: center">${player.emoji} ${player.name}</div>
             <div class="mt-lg">
               <div class="season-tip-label">Weltmeister (WDC)</div>
-              <div class="season-tip-value" style="color: ${teamColorForDriver(season, pred.wdc)}">
-                ${driverName(season, pred.wdc)}
+              <div class="season-tip-value">
+                <span class="team-dot" style="background: ${teamColorForDriver(season, pred.wdc)}"></span>${driverName(season, pred.wdc)}
               </div>
             </div>
             <div class="mt-md">

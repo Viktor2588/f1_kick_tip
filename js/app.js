@@ -15,17 +15,19 @@ const KNOWN_PLAYERS = [
 
 // Latest update notification: shown once per browser. For a new update, change `id`.
 const LATEST_UPDATE = {
-  id: '2026-11-02',
+  id: '2026-11-06',
   title: 'Update',
   items: [
-    'Ergebnis Mexiko ist eingetragen.',
-    'Ersatzfahrer Ryo Hirakawa (Haas) ist jetzt in der Fahrerliste.',
+    'Neues Design: Die Seite ist jetzt fürs Handy gemacht, mit Navigation unten am Bildschirm.',
+    'Auf dem Dashboard siehst du oben direkt das nächste Rennen mit Countdown.',
+    'Tipp-Vergleich und Punkte sind auf dem Handy jetzt ohne Seitwärts-Scrollen lesbar. Tippe auf einen Spieler in der Punkte-Übersicht, um die Details zu sehen.',
+    'Helles und dunkles Design passen sich automatisch deinem Handy an.',
   ],
 };
 const UPDATE_KEY = 'f1_seen_update';
 
 function renderUpdateNotice() {
-  const nav = document.querySelector('.nav-links');
+  const nav = document.querySelector('.header-actions') || document.querySelector('.nav-links');
   if (!nav) return;
   let seen = null;
   try { seen = localStorage.getItem(UPDATE_KEY); } catch {}
@@ -58,7 +60,7 @@ function renderUpdateNotice() {
  * Render the auth UI in the header (name badge or "Name wählen").
  */
 function renderAuthUI() {
-  const nav = document.querySelector('.nav-links');
+  const nav = document.querySelector('.header-actions') || document.querySelector('.nav-links');
   if (!nav) return;
 
   // Remove existing auth item

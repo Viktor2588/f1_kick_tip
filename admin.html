@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="de" style="background:#1A1A2E;color:#F5F5F5">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>F1 Kick Tip 2026 – Admin</title>
   <meta name="description" content="Admin-Bereich: Tipps, Ergebnisse & Spielerverwaltung">
   <meta name="theme-color" content="#E10600">
+  <meta name="color-scheme" content="dark light">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F527;</text></svg>">
-  <style>body{opacity:0}</style>
+  <style>html{background:#0E0F14;color:#F2F3F7}@media (prefers-color-scheme: light){html{background:#F4F5F8;color:#12131A}}body{opacity:0}</style>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body data-page="admin">
@@ -16,22 +17,22 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <a href="index.html" class="site-logo">
-        <span class="logo-f1">F1</span> Kick Tip 2026
+      <a href="index.html" class="site-logo" aria-label="F1 Kick Tip 2026 – Startseite">
+        <span class="logo-f1">F1</span><span class="logo-text">Kick Tip</span><span class="logo-year">2026</span>
       </a>
-      <nav>
+      <nav class="site-nav" aria-label="Hauptnavigation">
         <ul class="nav-links">
-          <li><a href="index.html">Dashboard</a></li>
-          <li><a href="saison.html">Tipps</a></li>
-          <li><a href="regeln.html">Regeln</a></li>
-          <li><a href="admin.html" class="active">Admin</a></li>
+          <li><a href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Dashboard</span></a></li>
+          <li><a href="saison.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 2.5h6v3H9z"/><path d="m9 13 2 2 4-4"/></svg><span>Tipps</span></a></li>
+          <li><a href="regeln.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z"/><path d="M9 9h6M9 13h6"/></svg><span>Regeln</span></a></li>
+          <li><a href="admin.html" class="active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg><span>Admin</span></a></li>
         </ul>
       </nav>
-      <div id="header-info"><div class="header-info">&nbsp;</div></div>
+      <ul class="header-actions"></ul>
     </div>
   </header>
 
-  <main class="container" style="padding-top: var(--space-xl); padding-bottom: var(--space-xl);">
+  <main class="container">
 
     <!-- Tab Navigation -->
     <nav class="admin-tabs">
