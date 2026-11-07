@@ -1,0 +1,32 @@
+{
+  "name": "f1-kick-tip",
+  "private": true,
+  "type": "module",
+  "description": "F1 Kick Tip \u2013 Tippspiel f\u00fcr die Formel-1-Saison (Rebuild #2)",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "build": "node scripts/build.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "fixtures": "node scripts/make-fixtures.js",
+    "db:reset": "node scripts/load.js fixtures/demo-2026.json --reset",
+    "import": "node scripts/load.js",
+    "deploy": "node scripts/build.js && wrangler deploy",
+    "check:ui": "node scripts/ui-check.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "htm": "^3.1.1",
+    "preact": "^11.2.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright-core": "^1.65.0",
+    "wrangler": "^4.158.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "workerd@1.20261104.1": true
+  }
+}

@@ -1,188 +1,68 @@
-# F1 Kick Tip 2026
+# Kick Tip 2026
 
-Tippspiel für die Formel-1-Saison 2026. Thomas, Julia und Viktor tippen vor jedem Rennen und vergleichen ihre Vorhersagen.
+Das F1-Tippspiel von Thomas, Julia und Viktor: vor jedem Rennen tippen, Punkte sammeln, Tabelle anschauen.
 
-## Mitspielen
+Rebuild #2 (branch `rebuild2-from-scratch`). One Cloudflare Worker serves the app and a small JSON API;
+the data lives in Cloudflare D1 (SQLite). The database credential exists only on the server.
 
-### Renntipps abgeben
-
-1. Öffne `data/predictions.json`
-2. Finde die aktuelle Runde (z.B. `"1"` für Runde 1)
-3. Trage deinen Tipp ein (verwende die IDs aus `data/season.json`):
-
-```json
-{
-  "predictions": {
-    "1": {
-      "thomas": {
-        "winner": "verstappen",
-        "podium": ["verstappen", "norris", "leclerc"],
-        "pole": "verstappen",
-        "fastestLap": "norris",
-        "bestConstructor": "mclaren",
-        "submittedAt": "2026-03-07T10:00:00Z"
-      }
-    }
-  }
-}
-```
-
-4. Committe und pushe **vor dem Rennstart**
-
-### Sprint-Tipps (6 Runden)
-
-Bei Sprint-Wochenenden zusätzlich `data/sprint-predictions.json` editieren:
-
-```json
-{
-  "sprintPredictions": {
-    "2": {
-      "thomas": {
-        "winner": "norris",
-        "podium": ["norris", "verstappen", "piastri"],
-        "submittedAt": "2026-03-14T08:00:00Z"
-      }
-    }
-  }
-}
-```
-
-Sprint-Tipps müssen **vor dem Sprint-Start** abgegeben werden.
-
-### Saison-Tipps (einmalig vor Runde 1)
-
-Editiere `data/season-predictions.json` **vor dem Start von Runde 1**:
-
-```json
-{
-  "seasonPredictions": {
-    "thomas": {
-      "wdc": "verstappen",
-      "wcc": "mclaren",
-      "submittedAt": "2026-03-01T12:00:00Z"
-    }
-  }
-}
-```
-
-## Ergebnisse eintragen
-
-Nach dem Rennen trägt jemand die Ergebnisse in `data/results.json` ein:
-
-```json
-{
-  "results": {
-    "1": {
-      "winner": "verstappen",
-      "podium": ["verstappen", "norris", "hamilton"],
-      "pole": "verstappen",
-      "fastestLap": "norris",
-      "bestConstructor": "mclaren",
-      "enteredAt": "2026-03-08T07:30:00Z"
-    }
-  }
-}
-```
-
-Sprint-Ergebnisse kommen in `data/sprint-results.json`.
-
-## Deadlines
-
-| Tipp-Art | Deadline |
-|---|---|
-| Renntipps | Vor Rennstart (`raceStartUTC`) |
-| Sprint-Tipps | Vor Sprint-Start (`sprintStartUTC`) |
-| Saison-Tipps | Vor Runde 1 |
-
-Verspätete Tipps (`submittedAt` nach Deadline) = **0 Punkte**.
-
-## Punktesystem
-
-### Hauptrennen (max. 21 Punkte)
-
-| Kategorie | Punkte |
-|---|---|
-| Rennsieger richtig (= Podium P1) | 3 |
-| Podium P2 exakt | 2 |
-| Podium P3 exakt | 2 |
-| Podium-Bonus (Fahrer auf dem Podium, aber falsche Position) | 1 je |
-| Pole Position | 3 |
-| Schnellste Runde | 3 |
-| Bester Konstrukteur | 3 |
-| Perfekte Runde (alles richtig) | 5 Bonus |
-
-Der Rennsieger ist automatisch Podium P1. Deshalb gibt es keinen separaten P1-Tipp neben dem Sieger-Tipp.
-
-Der Podium-Bonus gilt für **P1, P2 und P3**: Wenn dein getippter Fahrer auf dem Podium landet, aber auf einer anderen der drei Positionen, bekommst du **1 Punkt**.
-
-### Sprint (max. 7 Punkte)
-
-| Kategorie | Punkte |
-|---|---|
-| Sprint-Sieger | 3 |
-| Sprint P2 exakt | 1 |
-| Sprint P3 exakt | 1 |
-| Sprint Podium-Bonus | 1 je |
-| Perfekter Sprint | 2 Bonus |
-
-### Saison-Tipps
-
-| Kategorie | Punkte |
-|---|---|
-| Weltmeister (WDC) | 20 |
-| Konstrukteurs-WM (WCC) | 15 |
-
-**Tiebreaker**: Sieger-Tipps > Perfekte Runden > Pole-Tipps
-
-## Regression-Check
-
-Für schnelle Regeln-/Scoring-Checks gibt es `test-scoring.html`. Die Seite führt definierte Scoring-Szenarien automatisch im Browser aus, inklusive der Podium-Bonus-Fälle rund um **P1 ↔ P2/P3**.
-
-## Fahrer-IDs
-
-| Fahrer | ID | Team |
-|---|---|---|
-| Lando Norris | `norris` | McLaren |
-| Oscar Piastri | `piastri` | McLaren |
-| Charles Leclerc | `leclerc` | Ferrari |
-| Lewis Hamilton | `hamilton` | Ferrari |
-| Max Verstappen | `verstappen` | Red Bull |
-| Isack Hadjar | `hadjar` | Red Bull |
-| George Russell | `russell` | Mercedes |
-| Kimi Antonelli | `antonelli` | Mercedes |
-| Fernando Alonso | `alonso` | Aston Martin |
-| Lance Stroll | `stroll` | Aston Martin |
-| Alex Albon | `albon` | Williams |
-| Carlos Sainz | `sainz` | Williams |
-| Liam Lawson | `lawson` | Racing Bulls |
-| Arvid Lindblad | `lindblad` | Racing Bulls |
-| Esteban Ocon | `ocon` | Haas |
-| Oliver Bearman | `bearman` | Haas |
-| Nico Hülkenberg | `hulkenberg` | Audi |
-| Gabriel Bortoleto | `bortoleto` | Audi |
-| Pierre Gasly | `gasly` | Alpine |
-| Franco Colapinto | `colapinto` | Alpine |
-| Valtteri Bottas | `bottas` | Cadillac |
-| Sergio Perez | `perez` | Cadillac |
-
-## Team-IDs
-
-`mclaren`, `ferrari`, `redbull`, `mercedes`, `astonmartin`, `williams`, `racingbulls`, `haas`, `audi`, `alpine`, `cadillac`
-
-## Lokale Vorschau
-
-Einfach einen lokalen Webserver starten:
+## Run locally
 
 ```bash
-# Python
-python3 -m http.server 8000
-
-# Node.js
-npx serve .
+npm install
+npm run dev
 ```
 
-Dann `http://localhost:8000` im Browser öffnen.
+Opens on **http://127.0.0.1:5190**. On first start a local database is created and filled with a made-up demo
+season (`fixtures/demo-2026.json`, results up to round 19). No Cloudflare account is needed for local work.
 
-## Sprint-Wochenenden 2026
+- `npm run db:reset` – wipe the local database and reload the demo season.
+- `npm run import -- path/to/live-export.json` – load real data into the local database (see *Data import*).
+- `npm run fixtures` – regenerate the demo season.
 
-Runde 2 (China), 6 (Miami), 7 (Kanada), 11 (Großbritannien), 14 (Niederlande), 18 (Singapur)
+## Test
+
+```bash
+npm test                    # scoring rules, parity with the original 2026 scoring code, import
+node scripts/ui-check.js    # with `npm run dev` running: every page at 375px and 1280px, dark + light,
+                            # fails on console errors or horizontal scrolling; screenshots in .wrangler/screens/
+```
+
+`test/reference/legacy-scoring.js` is a verbatim copy of the old `js/scoring.js`. The parity tests run it side by side
+with the new engine (`src/shared/scoring.js`) on fixtures and on 10,000 random inputs, and include every case from the
+old `test-scoring.html`.
+
+## Data import
+
+`scripts/load.js` accepts the old app's data in either shape:
+- app format (what `fetchAllData()` returned, or the `data/*.json` files merged into one object), or
+- raw table rows (`race_predictions`, `sprint_predictions`, `season_predictions`, `race_results`, `sprint_results`).
+
+Calendar, drivers and teams come from `seed/season-2026.json`. Before writing anything the loader computes the
+standings with the **original** scoring code on the source data and with the new engine on the converted rows, and
+stops if anything differs (totals, tiebreak order or any per-race breakdown).
+
+## Deploy (not done yet – needs Viktor's go-ahead)
+
+```bash
+npx wrangler login
+npx wrangler d1 create f1-kick-tip          # put the printed database_id into wrangler.jsonc
+npx wrangler d1 migrations apply DB --remote
+node scripts/load.js live-export.json --remote
+npm run deploy
+```
+
+Free tier is plenty for this game. No secrets go into the repository.
+
+## Layout
+
+```
+src/shared/   scoring engine, row ↔ game conversion, import (used by Worker, browser and scripts)
+src/worker/   Cloudflare Worker: JSON API (/api/*), static files via the assets binding
+src/client/   browser app (Preact + htm), bundled to public/app.js by esbuild
+public/       index.html, app.css, icon, manifest
+migrations/   D1 schema
+seed/         2026 calendar, drivers, teams, players
+fixtures/     demo season and the old app's test data
+scripts/      dev server, build, data loader, browser check
+test/         node --test suites; reference/ holds the original scoring code for parity
+```

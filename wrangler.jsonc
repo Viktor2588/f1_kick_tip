@@ -1,0 +1,24 @@
+{
+  // F1 Kick Tip – one Worker serves the app (static assets) and the JSON API; data lives in D1.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "f1-kick-tip",
+  "main": "src/worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/join/*", "/kalender.ics"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "f1-kick-tip",
+      // Replaced by the real id from `wrangler d1 create f1-kick-tip` before the first deploy (see README).
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "dev": { "port": 5190, "ip": "127.0.0.1" },
+  "observability": { "enabled": true }
+}
