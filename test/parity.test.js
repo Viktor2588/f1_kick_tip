@@ -93,3 +93,16 @@ test('random sprint inputs: new scoreSprint equals the original', () => {
     assert.deepEqual(scoreSprint(tip, result, r), legacy.scoreSprint(tip, result, r), JSON.stringify({ tip, result }));
   }
 });
+
+test('the parity gate reports a difference when scores diverge (refusal path of scripts/load.js)', () => {
+  const data = readJson('../fixtures/demo-2026.json');
+  const { rows } = dataRows(data, season.players.map((p) => p.id));
+  const game = rowsToGame({ ...seasonRows(season), ...rows, news: [] });
+  const ours = calculateStandings(game);
+  const theirs = legacyStandings(season, legacyAppDataFromSource(data), null);
+  assert.equal(compareStandingsLists(theirs, ours), null);
+  // Corrupt one converted result: the gate must name the difference.
+  game.raceResults['3'] = { ...game.raceResults['3'], pole: 'nobody' };
+  const diff = compareStandingsLists(theirs, calculateStandings(game));
+  assert.match(diff, /round 3|position|correctPoles|totalPoints/);
+});

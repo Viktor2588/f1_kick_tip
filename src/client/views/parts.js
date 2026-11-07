@@ -12,13 +12,16 @@ export function Driver({ g, id, full = false }) {
   const d = g.driverById[id];
   if (!d) return html`<span class="driver driver-none">–</span>`;
   const team = g.teamById[d.team];
-  return html`<span class="driver" style=${`--tc:${team?.color || '#888'}`}>${full ? d.name : lastName(d)}</span>`;
+  const name = full ? d.name : lastName(d);
+  const code = lastName(d).normalize('NFD').replace(/[\u0300-\u036f]/g, '').slice(0, 3).toUpperCase();
+  return html`<span class="driver" style=${`--tc:${team?.color || '#888'}`} title=${d.name}><span class="nm-full">${name}</span><span class="nm-code" aria-hidden="true">${code}</span></span>`;
 }
 
 export function Team({ g, id }) {
   const t = g.teamById[id];
   if (!t) return html`<span class="driver driver-none">–</span>`;
-  return html`<span class="driver" style=${`--tc:${t.color}`}>${t.name}</span>`;
+  const code = t.name.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase();
+  return html`<span class="driver" style=${`--tc:${t.color}`} title=${t.name}><span class="nm-full">${t.name}</span><span class="nm-code" aria-hidden="true">${code}</span></span>`;
 }
 
 export function Move({ n }) {

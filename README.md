@@ -18,6 +18,20 @@ season (`fixtures/demo-2026.json`, results up to round 19). No Cloudflare accoun
 - `npm run db:reset` – wipe the local database and reload the demo season.
 - `npm run import -- path/to/live-export.json` – load real data into the local database (see *Data import*).
 - `npm run fixtures` – regenerate the demo season.
+- `npm run links -- --admin viktor` – create a personal link per player (written to `.wrangler/links.txt`, not printed).
+  Opening a link signs that player in on the device. Viktor can also create new links on the Admin page.
+
+## How the game works in the app
+
+- **Tippen:** players open their personal link once, then tap through Sieger → P2 → P3 → Pole → Schnellste Runde →
+  Konstrukteur (+ DNF/DNS from round 16, Sprint on sprint weekends). The server stamps the time and refuses tips after
+  the session starts.
+- **Hidden until lights-out:** before a session starts everyone sees *who* tipped, not *what*. After the start, all tips
+  are shown side by side, and once the result is in, hits and points are highlighted.
+- **Admin** (`/admin`, Viktor only): enter results (button *Vorschlag laden* pre-fills from the public Jolpica F1 API),
+  season final, news for the start page, new personal links.
+- **Kalender:** `/kalender.ics` – every sprint and race with a reminder 2 h before the tip deadline (subscribe link on
+  the Rennen page).
 
 ## Test
 
@@ -25,6 +39,8 @@ season (`fixtures/demo-2026.json`, results up to round 19). No Cloudflare accoun
 npm test                    # scoring rules, parity with the original 2026 scoring code, import
 node scripts/ui-check.js    # with `npm run dev` running: every page at 375px and 1280px, dark + light,
                             # fails on console errors or horizontal scrolling; screenshots in .wrangler/screens/
+node scripts/ui-check.js --flows   # also: sign in via link, tip the next race by tapping, save; admin page + news
+                                   # (changes the local DB; `npm run db:reset` afterwards)
 ```
 
 `test/reference/legacy-scoring.js` is a verbatim copy of the old `js/scoring.js`. The parity tests run it side by side

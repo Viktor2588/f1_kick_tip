@@ -1,9 +1,36 @@
+import { useState } from 'preact/hooks';
 import { html } from '../lib/html.js';
+import { toast } from '../lib/toast.js';
+import { deadline, isOpen } from '../../shared/tips.js';
+import { Picker, SEASON_SLOTS, toValue, toBody } from './picker.js';
+import { fmtWeekdayTime } from '../lib/format.js';
 import { standingsWithHistory, finishedRounds } from '../lib/derive.js';
-import { Player, Move, PointsChart } from './parts.js';
+import { Player, Move, PointsChart, Driver, Team } from './parts.js';
 import { shortRaceName } from '../lib/format.js';
 
-export function Standings({ g }) {
+function SeasonTipForm({ g, me, reload }) {
+  const existing = g.seasonTips[me.id];
+  const [v, setV] = useState(() => toValue('season', existing));
+  const [busy, setBusy] = useState(false);
+  const save = async () => {
+    setBusy(true);
+    try {
+      const res = await fetch('/api/tips/season', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(toBody('season', v)) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast('Saison-Tipp gespeichert ✓');
+      await reload();
+    } catch (e) { toast(e.message || 'Speichern fehlgeschlagen.', 'error'); } finally { setBusy(false); }
+  };
+  return html`<div class="stack">
+    <p class="muted small">Tippschluss ${fmtWeekdayTime(deadline('season', null, g.races))} (Start von Runde 1).</p>
+    <${Picker} g=${g} slots=${SEASON_SLOTS} value=${v} onChange=${setV} />
+    <div><button class="btn" onClick=${save} disabled=${busy || !v.wdc || !v.wcc}>${existing ? 'Saison-Tipp ändern' : 'Saison-Tipp abgeben'}</button></div>
+  </div>`;
+}
+
+export function Standings({ g, me, now, reload }) {
+  const seasonOpen = isOpen(deadline('season', null, g.races), now);
   const rows = standingsWithHistory(g);
   const rounds = finishedRounds(g);
   const last = rounds.length ? g.raceByRound[rounds[rounds.length - 1]] : null;
@@ -40,6 +67,20 @@ export function Standings({ g }) {
         })}
       </ol>
       <p class="muted small">Gleichstand: zuerst mehr richtige Sieger, dann mehr perfekte Runden, dann mehr richtige Poles.</p>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Saison-Tipps</h2><span class="muted small">WM 20 · Konstrukteure 15 Punkte</span></div>
+      <ul class="season-tips">
+        ${g.players.map((p) => {
+          const t = g.seasonTips[p.id];
+          return html`<li><${Player} p=${p} />
+            ${!t ? html`<span class="muted">kein Tipp</span>` : t.hidden ? html`<span class="muted">✓ getippt</span>` : html`<span class="st"><${Driver} g=${g} id=${t.wdc} full /><${Team} g=${g} id=${t.wcc} /></span>`}
+          </li>`;
+        })}
+      </ul>
+      ${g.seasonFinal ? '' : html`<p class="muted small">Wird nach dem letzten Rennen aufgelöst.</p>`}
+      ${seasonOpen && me && html`<${SeasonTipForm} g=${g} me=${me} reload=${reload} />`}
     </section>
 
     ${rounds.length > 1 && html`<section class="card">

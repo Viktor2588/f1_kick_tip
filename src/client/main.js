@@ -1,8 +1,11 @@
 import { render } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useState } from 'preact/hooks';
 import { html } from './lib/html.js';
 import { indexGame } from './lib/derive.js';
-import { usePath, Link } from './lib/router.js';
+import { usePath, Link, navigate } from './lib/router.js';
+import { Toasts, toast } from './lib/toast.js';
+import { Race } from './views/race.js';
+import { Admin } from './views/admin.js';
 import { Home } from './views/home.js';
 import { Standings } from './views/standings.js';
 import { Calendar } from './views/calendar.js';
@@ -17,19 +20,20 @@ const NAV = [
 
 function useGame() {
   const [state, setState] = useState({ status: 'loading' });
-  useEffect(() => {
-    let alive = true;
-    fetch('/api/state')
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((data) => {
-        if (!alive) return;
-        const offset = new Date(data.serverTime).getTime() - Date.now();
-        setState({ status: 'ready', game: indexGame(data), offset });
-      })
-      .catch((error) => alive && setState({ status: 'error', error }));
-    return () => { alive = false; };
+  const load = useCallback(async () => {
+    try {
+      const r = await fetch('/api/state');
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      const offset = new Date(data.serverTime).getTime() - Date.now();
+      setState({ status: 'ready', game: indexGame(data), me: data.me, offset });
+    } catch (error) {
+      setState((s) => (s.status === 'ready' ? s : { status: 'error', error }));
+      throw error;
+    }
   }, []);
-  return state;
+  useEffect(() => { load().catch(() => {}); }, [load]);
+  return { ...state, reload: load };
 }
 
 /** Current time corrected to the server clock, ticking every second. */
@@ -43,12 +47,45 @@ function useNow(offset = 0) {
   return now;
 }
 
-function Page({ path, game, now }) {
-  if (path === '/') return html`<${Home} g=${game} now=${now} />`;
-  if (path === '/tabelle') return html`<${Standings} g=${game} />`;
+function Page({ path, game, me, now, reload }) {
+  if (path === '/') return html`<${Home} g=${game} me=${me} now=${now} />`;
+  if (path === '/tabelle') return html`<${Standings} g=${game} me=${me} now=${now} reload=${reload} />`;
   if (path === '/rennen') return html`<${Calendar} g=${game} now=${now} />`;
+  const m = path.match(/^\/rennen\/(\d+)$/);
+  if (m) return html`<${Race} g=${game} round=${Number(m[1])} me=${me} now=${now} reload=${reload} />`;
   if (path === '/regeln') return html`<${Rules} />`;
+  if (path === '/admin') return html`<${Admin} g=${game} me=${me} now=${now} reload=${reload} />`;
   return html`<div class="empty"><p>Diese Seite gibt es nicht.</p><${Link} href="/">Zur Startseite</${Link}></div>`;
+}
+
+function Me({ me }) {
+  const [open, setOpen] = useState(false);
+  if (!me) return null;
+  const logout = async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    location.href = '/';
+  };
+  return html`<div class="me">
+    <button class="me-btn" style=${`--pc:${me.color}`} aria-expanded=${open} onClick=${() => setOpen(!open)}>
+      <span class="player-dot" aria-hidden="true">${me.emoji}</span><span class="me-name">${me.name}</span>
+    </button>
+    ${open && html`<div class="me-menu">
+      <p class="small muted">Angemeldet als ${me.name} auf diesem Gerät.</p>
+      ${me.isAdmin && html`<${Link} href="/admin" class="btn btn-ghost btn-sm" onClick=${() => setOpen(false)}>Admin</${Link}>`}
+      <button class="btn btn-ghost btn-sm" onClick=${logout}>Abmelden</button>
+    </div>`}
+  </div>`;
+}
+
+/** One-time notices from the join link redirect. */
+function useArrivalNotice(me, status) {
+  useEffect(() => {
+    if (status !== 'ready') return;
+    const q = new URLSearchParams(location.search);
+    if (q.has('willkommen') && me) toast(`Hallo ${me.name}! Du bist jetzt angemeldet.`);
+    if (q.get('link') === 'ungueltig') toast('Dieser Link ist ungültig oder wurde ersetzt.', 'error');
+    if (q.has('willkommen') || q.has('link')) navigate(location.pathname, { replace: true });
+  }, [status]);
 }
 
 function App() {
@@ -56,6 +93,7 @@ function App() {
   const state = useGame();
   const now = useNow(state.offset);
   const section = '/' + (path.split('/')[1] || '');
+  useArrivalNotice(state.me, state.status);
 
   useEffect(() => { window.scrollTo(0, 0); }, [path]);
 
@@ -67,11 +105,12 @@ function App() {
       <nav class="topnav" aria-label="Hauptmenü">
         ${NAV.map((n) => html`<${Link} href=${n.href} class=${section === n.href ? 'active' : ''}>${n.label}</${Link}>`)}
       </nav>
+      <${Me} me=${state.me} />
     </header>
     <main id="main">
       ${state.status === 'loading' && html`<div class="skeleton" aria-busy="true"><div></div><div></div><div></div></div>`}
       ${state.status === 'error' && html`<div class="empty"><p>Daten konnten nicht geladen werden.</p><button class="btn" onClick=${() => location.reload()}>Neu laden</button></div>`}
-      ${state.status === 'ready' && html`<${Page} path=${path} game=${state.game} now=${now} />`}
+      ${state.status === 'ready' && html`<${Page} path=${path} game=${state.game} me=${state.me} now=${now} reload=${state.reload} />`}
     </main>
     <nav class="tabbar" aria-label="Hauptmenü">
       ${NAV.map((n) => html`
@@ -80,6 +119,7 @@ function App() {
           <span>${n.label}</span>
         </${Link}>`)}
     </nav>
+    <${Toasts} />
   `;
 }
 

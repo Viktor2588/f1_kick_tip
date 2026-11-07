@@ -11,7 +11,8 @@
     "db:reset": "node scripts/load.js fixtures/demo-2026.json --reset",
     "import": "node scripts/load.js",
     "deploy": "node scripts/build.js && wrangler deploy",
-    "check:ui": "node scripts/ui-check.js"
+    "check:ui": "node scripts/ui-check.js",
+    "links": "node scripts/links.js"
   },
   "engines": {
     "node": ">=22"
