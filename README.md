@@ -1,188 +1,75 @@
-# F1 Kick Tip 2026
+# F1 Kick Tip 2026 – v2
 
-Tippspiel für die Formel-1-Saison 2026. Thomas, Julia und Viktor tippen vor jedem Rennen und vergleichen ihre Vorhersagen.
+Tippspiel für die Formel-1-Saison. Thomas, Julia und Viktor tippen vor jedem Rennen; die App wertet aus.
 
-## Mitspielen
+v2 ist ein kompletter Neubau (SvelteKit 2, Svelte 5, TypeScript). Die alte statische Seite liegt zum Nachschlagen in `legacy/`.
 
-### Renntipps abgeben
+## Was v2 anders macht
 
-1. Öffne `data/predictions.json`
-2. Finde die aktuelle Runde (z.B. `"1"` für Runde 1)
-3. Trage deinen Tipp ein (verwende die IDs aus `data/season.json`):
-
-```json
-{
-  "predictions": {
-    "1": {
-      "thomas": {
-        "winner": "verstappen",
-        "podium": ["verstappen", "norris", "leclerc"],
-        "pole": "verstappen",
-        "fastestLap": "norris",
-        "bestConstructor": "mclaren",
-        "submittedAt": "2026-03-07T10:00:00Z"
-      }
-    }
-  }
-}
-```
-
-4. Committe und pushe **vor dem Rennstart**
-
-### Sprint-Tipps (6 Runden)
-
-Bei Sprint-Wochenenden zusätzlich `data/sprint-predictions.json` editieren:
-
-```json
-{
-  "sprintPredictions": {
-    "2": {
-      "thomas": {
-        "winner": "norris",
-        "podium": ["norris", "verstappen", "piastri"],
-        "submittedAt": "2026-03-14T08:00:00Z"
-      }
-    }
-  }
-}
-```
-
-Sprint-Tipps müssen **vor dem Sprint-Start** abgegeben werden.
-
-### Saison-Tipps (einmalig vor Runde 1)
-
-Editiere `data/season-predictions.json` **vor dem Start von Runde 1**:
-
-```json
-{
-  "seasonPredictions": {
-    "thomas": {
-      "wdc": "verstappen",
-      "wcc": "mclaren",
-      "submittedAt": "2026-03-01T12:00:00Z"
-    }
-  }
-}
-```
-
-## Ergebnisse eintragen
-
-Nach dem Rennen trägt jemand die Ergebnisse in `data/results.json` ein:
-
-```json
-{
-  "results": {
-    "1": {
-      "winner": "verstappen",
-      "podium": ["verstappen", "norris", "hamilton"],
-      "pole": "verstappen",
-      "fastestLap": "norris",
-      "bestConstructor": "mclaren",
-      "enteredAt": "2026-03-08T07:30:00Z"
-    }
-  }
-}
-```
-
-Sprint-Ergebnisse kommen in `data/sprint-results.json`.
-
-## Deadlines
-
-| Tipp-Art | Deadline |
-|---|---|
-| Renntipps | Vor Rennstart (`raceStartUTC`) |
-| Sprint-Tipps | Vor Sprint-Start (`sprintStartUTC`) |
-| Saison-Tipps | Vor Runde 1 |
-
-Verspätete Tipps (`submittedAt` nach Deadline) = **0 Punkte**.
-
-## Punktesystem
-
-### Hauptrennen (max. 21 Punkte)
-
-| Kategorie | Punkte |
-|---|---|
-| Rennsieger richtig (= Podium P1) | 3 |
-| Podium P2 exakt | 2 |
-| Podium P3 exakt | 2 |
-| Podium-Bonus (Fahrer auf dem Podium, aber falsche Position) | 1 je |
-| Pole Position | 3 |
-| Schnellste Runde | 3 |
-| Bester Konstrukteur | 3 |
-| Perfekte Runde (alles richtig) | 5 Bonus |
-
-Der Rennsieger ist automatisch Podium P1. Deshalb gibt es keinen separaten P1-Tipp neben dem Sieger-Tipp.
-
-Der Podium-Bonus gilt für **P1, P2 und P3**: Wenn dein getippter Fahrer auf dem Podium landet, aber auf einer anderen der drei Positionen, bekommst du **1 Punkt**.
-
-### Sprint (max. 7 Punkte)
-
-| Kategorie | Punkte |
-|---|---|
-| Sprint-Sieger | 3 |
-| Sprint P2 exakt | 1 |
-| Sprint P3 exakt | 1 |
-| Sprint Podium-Bonus | 1 je |
-| Perfekter Sprint | 2 Bonus |
-
-### Saison-Tipps
-
-| Kategorie | Punkte |
-|---|---|
-| Weltmeister (WDC) | 20 |
-| Konstrukteurs-WM (WCC) | 15 |
-
-**Tiebreaker**: Sieger-Tipps > Perfekte Runden > Pole-Tipps
-
-## Regression-Check
-
-Für schnelle Regeln-/Scoring-Checks gibt es `test-scoring.html`. Die Seite führt definierte Scoring-Szenarien automatisch im Browser aus, inklusive der Podium-Bonus-Fälle rund um **P1 ↔ P2/P3**.
-
-## Fahrer-IDs
-
-| Fahrer | ID | Team |
+| Thema | v1 (statisch) | v2 |
 |---|---|---|
-| Lando Norris | `norris` | McLaren |
-| Oscar Piastri | `piastri` | McLaren |
-| Charles Leclerc | `leclerc` | Ferrari |
-| Lewis Hamilton | `hamilton` | Ferrari |
-| Max Verstappen | `verstappen` | Red Bull |
-| Isack Hadjar | `hadjar` | Red Bull |
-| George Russell | `russell` | Mercedes |
-| Kimi Antonelli | `antonelli` | Mercedes |
-| Fernando Alonso | `alonso` | Aston Martin |
-| Lance Stroll | `stroll` | Aston Martin |
-| Alex Albon | `albon` | Williams |
-| Carlos Sainz | `sainz` | Williams |
-| Liam Lawson | `lawson` | Racing Bulls |
-| Arvid Lindblad | `lindblad` | Racing Bulls |
-| Esteban Ocon | `ocon` | Haas |
-| Oliver Bearman | `bearman` | Haas |
-| Nico Hülkenberg | `hulkenberg` | Audi |
-| Gabriel Bortoleto | `bortoleto` | Audi |
-| Pierre Gasly | `gasly` | Alpine |
-| Franco Colapinto | `colapinto` | Alpine |
-| Valtteri Bottas | `bottas` | Cadillac |
-| Sergio Perez | `perez` | Cadillac |
+| Datenbank-Zugang | Neon-Owner-Zugangsdaten im Browser-JS: jeder konnte alles lesen und löschen | Zugangsdaten nur auf dem Server (`DATABASE_URL`) |
+| Wer bin ich? | Name im localStorage, jeder konnte für jeden tippen | PIN pro Spieler, signiertes Cookie (1 Jahr), Bremse gegen Durchprobieren |
+| Geheime Tipps | Alle Tipps gingen an jeden Browser, nur die Anzeige war verdeckt | Offene Tipps der anderen verlassen den Server nicht |
+| Deadline | Browser-Uhr; verspätete Tipps wurden gespeichert und still mit 0 gewertet | Server prüft die Deadline und lehnt ab |
+| Saison-Tipps | Wurden nie gewertet, nie gesperrt | Gesperrt ab Runde 1, gewertet sobald `final` in `season.json` steht |
+| Ergebnisse eintragen | Alles von Hand | „Von F1-API laden“ (Jolpica) füllt alles vor, inkl. bestem Konstrukteur und DNF/DNS; Punkte-Vorschau vor dem Speichern |
+| Regeln-Seite | Von Hand gepflegt (Sprint-Runden waren falsch) | Aus Punktetabelle und Kalender erzeugt |
 
-## Team-IDs
+Punkte werden **identisch** zu v1 berechnet (geprüft gegen den eingefrorenen alten Code, s. Tests). Einzige Ausnahme: ein leerer Tipp trifft kein leeres Ergebnisfeld mehr (v1 gab dafür Punkte).
 
-`mclaren`, `ferrari`, `redbull`, `mercedes`, `astonmartin`, `williams`, `racingbulls`, `haas`, `audi`, `alpine`, `cadillac`
-
-## Lokale Vorschau
-
-Einfach einen lokalen Webserver starten:
+## Lokal starten
 
 ```bash
-# Python
-python3 -m http.server 8000
-
-# Node.js
-npx serve .
+npm install
+cp .env.example .env   # DATA_SOURCE=file → lokale Testdaten, PIN für alle: 0000, Admin: viktor
+npm run dev
 ```
 
-Dann `http://localhost:8000` im Browser öffnen.
+Testdaten: `fixtures/dev/game.json` (echte Ergebnisse R1–R19 + zufällige Tipps). Beim ersten Start nach `.data/dev/` kopiert; löschen setzt zurück. Neu erzeugen: `npx vite-node scripts/make-dev-fixture.ts`.
 
-## Sprint-Wochenenden 2026
+Mit `NOW_OVERRIDE=2026-11-07T12:00:00Z` läuft die App mit fester Uhrzeit (Deadlines, Countdown, Aufdecken).
 
-Runde 2 (China), 6 (Miami), 7 (Kanada), 11 (Großbritannien), 14 (Niederlande), 18 (Singapur)
+## Tests
+
+```bash
+npm test            # Unit: Punkte, Gleichstand, Deadlines, Verdecken, Validierung, API-Import, Parität zu v1
+npm run test:e2e    # Playwright (iPhone-Größe): Login, Tippen/Ändern, Verdecken, Deadline-Sperre, Admin, kein Seitwärts-Scrollen
+npm run check       # Typen
+```
+
+`npm run test:e2e` legt außerdem Screenshots in `test-results/shots/` ab.
+
+## Produktion
+
+Läuft überall, wo Node läuft (`npm run build && npm start`, Adapter: `@sveltejs/adapter-node`). Für Vercel/Netlify/Cloudflare nur den Adapter in `svelte.config.js` tauschen.
+
+Umgebungsvariablen (siehe `.env.example`):
+
+- `DATA_SOURCE=neon`, `DATABASE_URL=…` – dieselbe Neon-Datenbank wie v1, **ohne Migration** (gleiche Tabellen/Spalten)
+- `SESSION_SECRET` – langer Zufallswert (`openssl rand -hex 32`)
+- `PLAYER_PINS` – `{"thomas":"<hash>","julia":"<hash>","viktor":"<hash>"}`, Hash per `npm run pin -- 1234`
+- `ADMIN_PLAYERS=viktor`
+
+### Umstieg von v1
+
+1. Vor dem Umstieg mit echten Daten prüfen (nur lesend): `DATABASE_URL=… npx vite-node scripts/verify-prod.ts` – vergleicht die Tabelle alt/neu.
+2. v2 deployen, PINs verteilen.
+3. **Neon-Passwort rotieren** (Neon-Konsole → Roles → Reset password). Das alte steht öffentlich im v1-Code und in der Git-History; erst die Rotation sperrt es aus. Danach nur noch in der Server-Umgebung von v2 eintragen.
+4. GitHub-Pages-Seite von v1 abschalten oder auf v2 weiterleiten.
+
+### Saisonende
+
+In `src/lib/domain/season.json` `"final": { "wdc": "<fahrer>", "wcc": "<team>" }` eintragen → Saison-Tipps zählen.
+
+## Aufbau
+
+```
+src/lib/domain/      Spielregeln, rein und testbar: scoring, schedule (Deadlines/Verdecken), validate, season.json
+src/lib/server/      Server-only: config, auth (PIN/Cookie), store/{file,neon}, jolpica (Ergebnis-Import)
+src/lib/components/  UI: SlotForm + PickerSheet (Tipp-Eingabe), TipMatrix, PointsChart, TabBar …
+src/routes/          Start, /rennen, /rennen/[runde], /tabelle, /saison, /regeln, /mehr, /login, /admin
+tests/unit, tests/e2e
+```
+
+Spieler-, Fahrer-, Team- und Rennliste: `src/lib/domain/season.json`.
